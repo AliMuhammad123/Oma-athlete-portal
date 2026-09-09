@@ -673,8 +673,31 @@ const CONFIG = {
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const configured = CONFIG.url.startsWith("http") && CONFIG.anonKey.length > 20;
-const sb = configured ? createClient(CONFIG.url, CONFIG.anonKey) : null;
+// Trailing slashes and dashboard URLs are the two most common paste errors.
+const cleanUrl = (CONFIG.url || "").trim().replace(/\/+$/, "");
+if(cleanUrl.includes("supabase.com/dashboard")){
+  console.error("That's the dashboard URL. You need the API URL from Settings > API — it looks like https://abcdefgh.supabase.co");
+}
+const configured = /^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(cleanUrl) && CONFIG.anonKey.length > 20;
+const sb = configured ? createClient(cleanUrl, CONFIG.anonKey.trim()) : null;
+
+// Debug handle. Open the console and run: await omaDebug()
+window.sb = sb;
+window.omaDebug = async () => {
+  const { data:{ session } } = await sb.auth.getSession();
+  const info = {
+    origin: location.origin,
+    signedIn: !!session,
+    userId: session?.user?.id ?? null,
+    tokenPresent: !!session?.access_token,
+    profile: state.profile,
+    athleteId: state.athleteId
+  };
+  console.table(info);
+  if(!session) console.warn("No session — the request will go out anonymous and RLS will reject it.");
+  if(location.protocol === "file:") console.warn("Running from file:// — sessions cannot persist. Serve over http instead.");
+  return info;
+};
 
 const state = {
   session:null,
@@ -785,13 +808,14 @@ function hideGate(){
 function setupScreen(){
   showGate(`<div class="gate-card">
     <div class="gate-mark"><span class="mark-badge">OM</span><span class="mark-text">Athletes<span> Portal</span></span></div>
-    <h1>Add your Supabase keys</h1>
-    <p class="lead">Open this file in an editor and replace the two values at the top of the script block.</p>
+    <h1>Check your Supabase keys</h1>
+    <p class="lead">Open this file in an editor and set the two values at the top of the script block.</p>
     <div class="setup-code">const CONFIG = {
-  url:     "https://xxxxx.supabase.co",
+  url:     "https://abcdefgh.supabase.co",
   anonKey: "eyJhbGciOi..."
 };</div>
-    <p class="hint">Both are in your Supabase dashboard under Settings &rsaquo; API. Use the <b>anon / public</b> key — never the service_role key, which bypasses all security.</p>
+    <p class="hint">Both are in Supabase under Settings &rsaquo; API. Use the <b>anon / public</b> key — never service_role.</p>
+    <p class="hint" style="margin-top:10px">The URL must have <b>no trailing slash</b> and must be the API URL, not the <code>supabase.com/dashboard/...</code> address from your browser bar.</p>
   </div>`);
 }
 
@@ -1212,9 +1236,17 @@ VIEWS.mediakit = async () => {
 VIEWS.gallery = async () => {
   const media = await load.media() || [];
   let urls = {};
-  if(media.length){
-    const { data } = await sb.storage.from("media").createSignedUrls(media.map(m=>m.storage_path), 3600);
-    (data||[]).forEach((d,i)=>{ if(d.signedUrl) urls[media[i].id] = d.signedUrl; });
+  const withPaths = media.filter(m => typeof m.storage_path === "string" && m.storage_path.trim().length);
+  if(withPaths.length){
+    const { data, error } = await sb.storage.from("media")
+      .createSignedUrls(withPaths.map(m => m.storage_path.replace(/^\/+/, "")), 3600);
+    if(error){
+      console.error("storage", error);
+      toast(/bucket/i.test(error.message)
+        ? "Storage bucket 'media' not found — create it in Supabase"
+        : error.message.slice(0,90), true);
+    }
+    (data||[]).forEach((d,i)=>{ if(d.signedUrl) urls[withPaths[i].id] = d.signedUrl; });
   }
   return `<section class="view">
     ${pageHead("Gallery","Every photo and clip you own.")}
@@ -1494,13 +1526,29 @@ const ACT = {
   async "create-athlete"(){
     const first_name = $("#o-first").value.trim(), last_name = $("#o-last").value.trim();
     if(!first_name || !last_name){ toast("Add your name", true); return; }
-    const row = await q(sb.from("athletes").insert({
-      profile_id: state.profile.id, first_name, last_name,
-      sport: $("#o-sport").value.trim() || null,
-      school: $("#o-school").value.trim() || null,
-      roster_flag: "Needs profile update"
-    }).select().single(),"create athlete");
-    if(row) boot();
+
+    // Goes through a security-definer function rather than a direct insert,
+    // so it doesn't depend on the athletes_insert policy being right.
+    const { data, error } = await sb.rpc("create_my_athlete", {
+      p_first: first_name,
+      p_last: last_name,
+      p_sport: $("#o-sport").value.trim() || null,
+      p_school: $("#o-school").value.trim() || null
+    });
+
+    if(error){
+      console.error("create_my_athlete", error);
+      // Fall back to a plain insert in case the function isn't installed yet.
+      const row = await q(sb.from("athletes").insert({
+        profile_id: state.profile.id, first_name, last_name,
+        sport: $("#o-sport").value.trim() || null,
+        school: $("#o-school").value.trim() || null,
+        roster_flag: "Needs profile update"
+      }).select().single(),"create athlete");
+      if(row) boot();
+      return;
+    }
+    if(data) boot();
   },
 
   reload(){ boot(); },
