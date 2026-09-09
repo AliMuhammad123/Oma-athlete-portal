@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>OMA — Athlete Portal</title>
+<title>OMA — Operation Millionaire Athletes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+
 /* ============================================================
    OMA — Operation Millionaire Athletes
    Athlete Portal prototype. Single file: HTML + CSS + JS.
@@ -554,238 +555,151 @@ input,select,textarea{font:inherit;color:inherit}
   .kit{border:0;border-radius:0}
   .kit-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+/* ---------- auth / setup screens ---------- */
+.gate{
+  min-height:100vh;display:grid;place-items:center;padding:24px 18px;
+  background:
+    radial-gradient(120% 90% at 80% 0%,rgba(193,151,47,.16),transparent 60%),
+    linear-gradient(165deg,#3E1533,var(--ink) 60%,#1E0918);
+}
+.gate-card{
+  width:100%;max-width:430px;background:var(--paper);
+  border-radius:20px;padding:28px 24px;
+  box-shadow:0 20px 60px rgba(20,5,16,.45);
+  animation:rise .4s ease both;
+}
+.gate-mark{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.gate h1{font-family:var(--f-display);font-size:26px;letter-spacing:-.02em;margin-bottom:6px}
+.gate p.lead{color:var(--mauve);font-size:14px;margin-bottom:20px}
+.gate .f{margin-bottom:13px}
+.gate .btn{width:100%;padding:12px}
+.gate-switch{
+  text-align:center;margin-top:16px;font-size:13.5px;color:var(--mauve);
+}
+.gate-switch button{color:var(--plum);font-weight:600;text-decoration:underline}
+.gate-err{
+  background:#F8EDED;color:var(--rust);border-radius:10px;padding:10px 13px;
+  font-size:13.5px;margin-bottom:14px;
+}
+.gate-ok{
+  background:#E9F2EF;color:var(--jade);border-radius:10px;padding:10px 13px;
+  font-size:13.5px;margin-bottom:14px;
+}
+.roleopts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.roleopt{
+  border:1.5px solid var(--line);border-radius:12px;padding:11px;background:#fff;
+  text-align:left;font-size:13.5px;
+}
+.roleopt[aria-pressed="true"]{border-color:var(--gold);background:#FDFAF2}
+.roleopt b{display:block;font-size:14px}
+.roleopt span{color:var(--mauve);font-size:12px}
+
+.setup-code{
+  background:var(--ink);color:#EBD7A0;border-radius:10px;padding:13px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+  overflow-x:auto;white-space:pre;margin:12px 0;
+}
+
+/* ---------- loading ---------- */
+.skel{
+  background:linear-gradient(90deg,#F1EAEE 25%,#F8F4F6 50%,#F1EAEE 75%);
+  background-size:400% 100%;animation:shimmer 1.3s ease infinite;
+  border-radius:10px;height:14px;margin-bottom:9px;
+}
+@keyframes shimmer{from{background-position:100% 0}to{background-position:0 0}}
+.skel.tall{height:120px;border-radius:14px;margin-bottom:14px}
+.loading-wrap{padding:22px 0}
+
+.saving{opacity:.55;pointer-events:none}
+
 </style>
 </head>
 <body>
 
-<!-- ============ SIDEBAR (desktop) ============ -->
-<aside class="sidebar no-print">
-  <a class="mark" href="#dashboard">
+<aside class="sidebar no-print" id="sidebar" hidden>
+  <a class="mark" href="#">
     <span class="mark-badge">OM</span>
     <span class="mark-text">Athletes<span> Portal</span></span>
   </a>
-  <button class="rolepill" data-act="switch-role" aria-label="Switch portal">
+  <div class="rolepill" style="cursor:default">
     <span class="rolepill-dot"></span>
-    <span><small>Viewing as</small><b id="rolename">Athlete</b></span>
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></svg>
-  </button>
+    <span><small id="rolelabel">Signed in as</small><b id="rolename">—</b></span>
+  </div>
   <nav class="nav-group" id="sidenav" aria-label="Main"></nav>
   <nav class="nav-group">
     <p class="nav-label">Account</p>
-    <button class="nav-item" data-go="settings">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.35.4.64.73.83"/></svg>
-      Settings
-    </button>
-    <button class="nav-item" data-act="logout">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      Log out
+    <button class="nav-item" data-act="signout">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      Sign out
     </button>
   </nav>
 </aside>
 
-<div class="layout">
-
-  <!-- ============ TOP BAR ============ -->
+<div class="layout" id="layout" hidden>
   <header class="topbar no-print">
     <div class="topbar-in">
-      <a class="mark" href="#dashboard" id="topmark">
+      <a class="mark" href="#">
         <span class="mark-badge">OM</span>
         <span class="mark-text">Athletes<span> Portal</span></span>
       </a>
-      <div class="searchwrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input type="search" placeholder="Search brands, deals, photos" aria-label="Search" id="search">
-      </div>
-      <button class="icon-btn rolebtn" data-act="switch-role" aria-label="Switch portal">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></svg>
-      </button>
-      <button class="icon-btn" data-go="messages" aria-label="Notifications">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-        <span class="dot"></span>
-      </button>
-      <button class="avatar-btn" data-go="profile" aria-label="Your profile" id="topavatar">JW</button>
+      <button class="avatar-btn" data-act="account" aria-label="Account" id="topavatar">—</button>
     </div>
   </header>
-
   <main class="shell" id="view" tabindex="-1"></main>
 </div>
 
-<!-- ============ BOTTOM TABS (mobile) ============ -->
-<nav class="tabbar no-print" id="tabbar" aria-label="Main"></nav>
+<nav class="tabbar no-print" id="tabbar" aria-label="Main" hidden></nav>
 
+<div id="gate"></div>
 <div id="modal-root"></div>
 <div id="toasts" aria-live="polite"></div>
 
-<script>
-"use strict";
-
+<script type="module">
 /* ============================================================
-   1. DEMO DATA
-   Stands in for the API. One athlete, populated enough that
-   every screen has something real to show.
+   OMA — live build, connected to Supabase.
+
+   >>> PASTE YOUR TWO VALUES HERE <<<
+   Supabase dashboard > Settings > API
+   Use the "anon / public" key. NEVER the service_role key.
    ============================================================ */
 
-const DB = {
-  athlete:{
-    first:"Jayda", last:"Whitmore", nickname:"Jay",
-    number:"12",
-    dob:"2009-03-14", age:17,
-    school:"Marist Preparatory", classYear:"Class of 2027", grade:"Junior",
-    sport:"Basketball", position:"Point guard", second:"Track — 400m",
-    height:"5'9\"", weight:"148 lb",
-    gpa:"3.86", honors:"Honor roll, 3 semesters",
-    hometown:"Atlanta, GA",
-    bioShort:"Junior point guard out of Atlanta running a fast offense and a faster comeback story.",
-    bioLong:"Jayda picked up a ball at seven and hasn't put it down since. She runs the offense at Marist Prep, led the region in assists last season, and came back from a torn meniscus in eight months to do it. Off the court she posts training breakdowns and study-day vlogs that her audience actually finishes — her saves-per-post beats accounts five times her size.",
-    achievements:[
-      "All-Region First Team, 2025–26",
-      "Region leader in assists (7.4 apg), 2025–26",
-      "Team captain, junior year",
-      "State 4×400m relay finalist, 2025"
-    ],
-    socials:[
-      {net:"Instagram", handle:"@jayda.hoops", followers:41200},
-      {net:"TikTok", handle:"@jaydawhitmore", followers:68500},
-      {net:"X", handle:"@jaydahoops", followers:5400},
-      {net:"YouTube", handle:"Jayda Whitmore", followers:9100}
-    ],
-    engagement:"6.2%",
-    audience:"71% female · 62% aged 13–24 · 48% Southeast US",
-    guardian:{name:"Renée Whitmore", rel:"Mother", email:"renee.whitmore@email.com", phone:"(404) 555-0188"},
-    interests:["Fitness & training","Skincare & beauty","Athletic apparel","Food & beverage","Study/EdTech"],
-    availability:"Weekends + weekday evenings after 6pm. Blackout: Feb 3–20 (state tournament).",
-    gpaPublic:false
-  },
-
-  tasks:[
-    {id:"t1", label:"Sign the Lumen Athletic ambassador contract", due:"Due tomorrow", done:false},
-    {id:"t2", label:"Post 2 Instagram stories for Rosewater Skin", due:"Due Friday", done:false},
-    {id:"t3", label:"Upload 3 new action shots from the Fulton game", due:"Due Sunday", done:false},
-    {id:"t4", label:"Approve media kit v2 before it goes to Cordial Foods", due:"Done Monday", done:true}
-  ],
-
-  activity:[
-    {who:"Lumen Athletic", what:"replied to your pitch", when:"2 hours ago", kind:"replied"},
-    {who:"Cordial Foods", what:"opened your media kit — 3 views", when:"Yesterday", kind:"opened"},
-    {who:"Rosewater Skin", what:"payment of $1,200 received", when:"2 days ago", kind:"paid"},
-    {who:"Vaulted Athletics", what:"outreach email sent", when:"4 days ago", kind:"sent"}
-  ],
-
-  deals:[
-    {id:"d1", brand:"Rosewater Skin", type:"Social post bundle", value:1200, status:"Paid", paid:"2026-09-05", approval:"Approved",
-     deliverables:[{t:"3 IG stories, launch week", done:true},{t:"1 in-feed reel", done:true}], contract:"rosewater-agreement.pdf"},
-    {id:"d2", brand:"Lumen Athletic", type:"Ambassador — 6 months", value:6000, status:"Signed", paid:"2026-10-01", approval:"Approved",
-     deliverables:[{t:"2 posts per month", done:false},{t:"Wear kit at 4 home games", done:true},{t:"1 appearance at fall launch", done:false}], contract:"lumen-ambassador.pdf"},
-    {id:"d3", brand:"Cordial Foods", type:"Appearance", value:850, status:"Pending", paid:"—", approval:"Awaiting approval",
-     deliverables:[{t:"2hr store appearance, Nov 8", done:false}], contract:null,
-     terms:"Two hours in-store, Nov 8, 11am–1pm. Travel covered. No exclusivity clause. Payment 30 days after the appearance."},
-    {id:"d4", brand:"Fulton Sports Co.", type:"Product seeding", value:400, status:"Completed", paid:"2026-07-22", approval:"Approved",
-     deliverables:[{t:"1 unboxing reel", done:true}], contract:"fulton-terms.pdf"}
-  ],
-
-  /* ---- roster & agency data (admin portal) ---- */
-  role:"athlete",
-
-  roster:[
-    {id:"r1", name:"Jayda Whitmore", sport:"Basketball", school:"Marist Preparatory", grade:"Junior", flag:"Active", deals:4, earned:3700, reach:124200, note:"Lumen call Thursday. Strongest comeback story on the roster."},
-    {id:"r2", name:"Deshawn Alvarez", sport:"Football", school:"Northside High", grade:"Senior", flag:"In negotiation", deals:3, earned:8200, reach:210400, note:"Two offers on the table. Waiting on guardian sign-off."},
-    {id:"r3", name:"Mia Okonkwo", sport:"Track", school:"Riverbend Academy", grade:"Sophomore", flag:"Needs profile update", deals:1, earned:750, reach:34800, note:"No headshots uploaded since March. Chase her."},
-    {id:"r4", name:"Cole Brennan", sport:"Baseball", school:"St. Aidan's", grade:"Junior", flag:"Active", deals:2, earned:2400, reach:51900, note:""},
-    {id:"r5", name:"Amara Silva", sport:"Volleyball", school:"Marist Preparatory", grade:"Senior", flag:"Active", deals:5, earned:11400, reach:298000, note:"Top earner. Renewal due in November."},
-    {id:"r6", name:"Tyler Nakamura", sport:"Soccer", school:"Northside High", grade:"Freshman", flag:"Needs profile update", deals:0, earned:0, reach:8900, note:"Just signed. Onboarding call not booked yet."}
-  ],
-
-  campaigns:[
-    {id:"c1", brand:"Lumen Athletic", brief:"Fall kit launch — 6 athletes, multi-sport", athletes:6, sent:6, replies:2, status:"Active"},
-    {id:"c2", brand:"Halo Hydration", brief:"Endurance and court sports, spring roster", athletes:4, sent:4, replies:0, status:"Active"},
-    {id:"c3", brand:"Studyline", brief:"Student-athletes, 3.5 GPA and above", athletes:3, sent:0, replies:0, status:"Draft"}
-  ],
-
-  contacts:[
-    {brand:"Lumen Athletic", person:"Dara Simms", role:"Brand Partnerships", email:"dara@lumenathletic.com", last:"Sep 3, 2026", deals:2},
-    {brand:"Rosewater Skin", person:"Elle Ntumba", role:"Founder", email:"elle@rosewaterskin.com", last:"Jun 19, 2026", deals:1},
-    {brand:"Cordial Foods", person:"Marcus Bell", role:"Marketing", email:"m.bell@cordialfoods.com", last:"Aug 28, 2026", deals:0},
-    {brand:"Halo Hydration", person:"Tom Reyes", role:"Growth", email:"tom@halohydration.com", last:"Aug 11, 2026", deals:0}
-  ],
-
-  payments:[
-    {src:"Rosewater Skin", amt:1200, date:"Sep 5, 2026"},
-    {src:"Fulton Sports Co.", amt:400, date:"Jul 22, 2026"},
-    {src:"Lumen Athletic — signing", amt:1500, date:"Jul 1, 2026"},
-    {src:"Marist Collective", amt:600, date:"May 14, 2026"}
-  ],
-
-  outreach:[
-    {id:"o1", brand:"Lumen Athletic", contact:"Dara Simms, Brand Partnerships", sent:"2026-09-03", status:"Replied", next:"2026-09-08", notes:"Wants a call this week. Asked for Q4 availability."},
-    {id:"o2", brand:"Cordial Foods", contact:"Marcus Bell, Marketing", sent:"2026-08-28", status:"Opened", next:"2026-09-09", notes:"Opened the kit three times, no reply yet."},
-    {id:"o3", brand:"Vaulted Athletics", contact:"Priya Nandan, NIL Lead", sent:"2026-09-01", status:"Sent", next:"2026-09-10", notes:""},
-    {id:"o4", brand:"Halo Hydration", contact:"Tom Reyes, Growth", sent:"2026-08-11", status:"Declined", next:"—", notes:"Roster full through spring. Revisit in March."},
-    {id:"o5", brand:"Rosewater Skin", contact:"Elle Ntumba, Founder", sent:"2026-06-19", status:"Deal closed", next:"—", notes:"Closed at $1,200. Great to work with."}
-  ],
-
-  templates:[
-    {id:"tp1", name:"First pitch", desc:"Cold intro to a brand that has never heard of you"},
-    {id:"tp2", name:"Follow-up", desc:"Nudge after 5–7 days of silence"},
-    {id:"tp3", name:"Thank you", desc:"After a call or a first campaign"},
-    {id:"tp4", name:"Contract ready", desc:"You've agreed terms and want it in writing"}
-  ],
-
-  brands:[
-    {name:"Lumen Athletic", cat:"Athletic apparel", looks:"Multi-sport athletes with strong short-form video and a training-content habit.", status:"In progress", mark:"LA", cls:""},
-    {name:"Rosewater Skin", cat:"Skincare & beauty", looks:"Female athletes aged 16–22 with a majority-female audience.", status:"Partnered", mark:"RS", cls:"g"},
-    {name:"Cordial Foods", cat:"Food & beverage", looks:"Regional athletes who can show up in person for store openings.", status:"In progress", mark:"CF", cls:"i"},
-    {name:"Vaulted Athletics", cat:"Training & recovery", looks:"Athletes with a documented injury-comeback story.", status:"Not contacted", mark:"VA", cls:""},
-    {name:"Halo Hydration", cat:"Food & beverage", looks:"High-volume posters in endurance and court sports.", status:"Not contacted", mark:"HH", cls:"i"},
-    {name:"Studyline", cat:"EdTech", looks:"Student-athletes with a 3.5+ GPA who post study content.", status:"Not contacted", mark:"SL", cls:"g"}
-  ],
-
-  gallery:[
-    {id:"g1", name:"Headshot — navy", folder:"Headshots", date:"Aug 2026", fav:true,  flag:"Approved", cls:"a"},
-    {id:"g2", name:"Drive vs. Fulton", folder:"Action shots", date:"Aug 2026", fav:true,  flag:"Approved", cls:"c"},
-    {id:"g3", name:"Rosewater unboxing", folder:"Sponsor content", date:"Aug 2026", fav:false, flag:"Posted", cls:"b"},
-    {id:"g4", name:"Warm-up, region final", folder:"Game day", date:"Jul 2026", fav:false, flag:"Approved", cls:"d"},
-    {id:"g5", name:"Locker room, pre-game", folder:"Behind the scenes", date:"Jul 2026", fav:false, flag:"Draft", cls:"a"},
-    {id:"g6", name:"Headshot — gold", folder:"Headshots", date:"Jun 2026", fav:false, flag:"Approved", cls:"b"},
-    {id:"g7", name:"Assist reel still", folder:"Action shots", date:"Jun 2026", fav:true,  flag:"Approved", cls:"c"},
-    {id:"g8", name:"Lumen kit fitting", folder:"Sponsor content", date:"Jun 2026", fav:false, flag:"Draft", cls:"d"}
-  ],
-  folders:["All","Headshots","Action shots","Sponsor content","Behind the scenes","Game day","Social posts"],
-  activeFolder:"All",
-
-  messages:[
-    {from:"them", who:"Tasha Boyd — OMA agent", text:"Lumen came back — they want a 15-minute call Thursday. I'll sit in. Can you do 5pm?", at:"9:12 AM"},
-    {from:"me", text:"Yes, 5 works. Do I need to prep anything?", at:"9:20 AM"},
-    {from:"them", who:"Tasha Boyd — OMA agent", text:"Just know your numbers. Bring up the comeback season — that's the story they responded to.", at:"9:24 AM"}
-  ],
-
-  notifications:[
-    {text:"Cordial Foods viewed your media kit", when:"Yesterday"},
-    {text:"Payment of $1,200 from Rosewater Skin cleared", when:"2 days ago"},
-    {text:"Your mother approved the Lumen Athletic deal", when:"3 days ago"}
-  ],
-
-  kitTemplate:"editorial"
+const CONFIG = {
+  url:     "YOUR_SUPABASE_URL",      // e.g. https://abcdefgh.supabase.co
+  anonKey: "YOUR_SUPABASE_ANON_KEY"
 };
 
-/* ============================================================
-   2. HELPERS
-   ============================================================ */
+/* ============================================================ */
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const configured = CONFIG.url.startsWith("http") && CONFIG.anonKey.length > 20;
+const sb = configured ? createClient(CONFIG.url, CONFIG.anonKey) : null;
+
+const state = {
+  session:null,
+  profile:null,
+  athleteId:null,      // the athlete currently being viewed
+  athlete:null,
+  roster:[],
+  wards:[],
+  route:"dashboard",
+  busy:false
+};
+
+/* ---------- tiny helpers ---------- */
 const $  = (s,r=document)=>r.querySelector(s);
-const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
-const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const money = n => "$"+n.toLocaleString("en-US");
-const compact = n => n>=1000 ? (n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,"")+"K" : String(n);
-const fullName = () => DB.athlete.first+" "+DB.athlete.last;
-const initials = () => (DB.athlete.first[0]+DB.athlete.last[0]).toUpperCase();
-const totalReach = () => DB.athlete.socials.reduce((s,x)=>s+x.followers,0);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cents = n => "$"+((n||0)/100).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:2});
+const compact = n => !n ? "0" : n>=1000 ? (n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,"")+"K" : String(n);
+const fmt = d => d ? new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}) : "—";
+const initialsOf = s => (s||"?").split(" ").filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
 const statusClass = s => ({
-  "Replied":"jade","Deal closed":"jade","Paid":"jade","Signed":"jade","Partnered":"jade",
-  "Opened":"gold","Pending":"gold","In progress":"gold","Active":"gold",
-  "Declined":"rust",
-  "Sent":"neutral","Completed":"plum","Not contacted":"neutral","Draft":"neutral",
-  "Approved":"jade","Posted":"plum"
+  "Replied":"jade","Deal closed":"jade","Paid":"jade","Signed":"jade","Partnered":"jade","Approved":"jade","Active":"jade",
+  "Opened":"gold","Pending":"gold","In progress":"gold","Awaiting approval":"gold",
+  "Declined":"rust","Sent":"neutral","Not contacted":"neutral","Draft":"neutral","Completed":"plum","Posted":"plum",
+  "Needs profile update":"gold","In negotiation":"gold"
 }[s] || "neutral");
 
 const ico = {
@@ -798,1857 +712,1271 @@ const ico = {
   brands:'<path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-5h4v5"/>',
   chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', check:'<path d="m4 12 5 5L20 6"/>',
   spark:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>',
-  down:'<path d="M12 3v13M7 12l5 5 5-5M4 21h16"/>',
+  down:'<path d="M12 3v13M7 12l5 5 5-5M4 21h16"/>', upload:'<path d="M12 21V8M7 12l5-5 5 5M4 3h16"/>',
   share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
   eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
   edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
   star:'<path d="m12 3 2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.4l6.1-.8z"/>',
-  upload:'<path d="M12 21V8M7 12l5-5 5 5M4 3h16"/>',
   folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
-  check:'<path d="m4 12 5 5L20 6"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
-  send:'<path d="M21 3 3 10.5l7 3 3 7z"/>',
-  x:'<path d="M6 6l12 12M18 6 6 18"/>',
-  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.35.4.64.73.83"/>',
-  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'
+  send:'<path d="M21 3 3 10.5l7 3 3 7z"/>', x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>'
 };
-const svg = (k,s=18) =>
-  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ico[k]}</svg>`;
+const svg = (k,s=18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ico[k]||""}</svg>`;
 
-/* ---- toast ---- */
-function toast(msg){
+function toast(msg, bad){
   const el = document.createElement("div");
   el.className = "toast";
-  el.innerHTML = svg("check",17)+"<span>"+esc(msg)+"</span>";
+  el.innerHTML = svg(bad?"x":"check",17)+"<span>"+esc(msg)+"</span>";
   $("#toasts").appendChild(el);
-  setTimeout(()=>{ el.classList.add("out"); setTimeout(()=>el.remove(),230); }, 2600);
+  setTimeout(()=>{ el.classList.add("out"); setTimeout(()=>el.remove(),230); }, 3000);
 }
 
-/* ---- modal ---- */
-let lastFocus = null;
+let lastFocus=null;
 function openModal({title, body, foot=""}){
   lastFocus = document.activeElement;
-  const root = $("#modal-root");
-  root.innerHTML =
-    `<div class="scrim" data-close-scrim>
-      <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
-        <div class="modal-head">
-          <h2>${esc(title)}</h2>
-          <button class="icon-btn" data-close aria-label="Close">${svg("x",19)}</button>
-        </div>
-        <div class="modal-body">${body}</div>
-        ${foot ? `<div class="modal-foot">${foot}</div>` : ""}
-      </div>
-    </div>`;
-  document.body.style.overflow = "hidden";
-  const first = root.querySelector("input,textarea,select,button:not([data-close])");
-  if(first) setTimeout(()=>first.focus(),60);
+  $("#modal-root").innerHTML =
+   `<div class="scrim" data-close-scrim><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+      <div class="modal-head"><h2>${esc(title)}</h2>
+        <button class="icon-btn" data-close aria-label="Close">${svg("x",19)}</button></div>
+      <div class="modal-body">${body}</div>
+      ${foot?`<div class="modal-foot">${foot}</div>`:""}
+    </div></div>`;
+  document.body.style.overflow="hidden";
+  const f = $("#modal-root").querySelector("input,textarea,select");
+  if(f) setTimeout(()=>f.focus(),60);
 }
 function closeModal(){
-  $("#modal-root").innerHTML = "";
-  document.body.style.overflow = "";
-  if(lastFocus && lastFocus.focus) lastFocus.focus();
+  $("#modal-root").innerHTML=""; document.body.style.overflow="";
+  if(lastFocus?.focus) lastFocus.focus();
 }
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+
+/* ---------- query wrapper: surfaces RLS errors instead of silently empty ---------- */
+async function q(promise, label){
+  const { data, error } = await promise;
+  if(error){
+    console.error(label||"query", error);
+    toast(error.message.slice(0,90), true);
+    return null;
+  }
+  return data;
+}
 
 /* ============================================================
-   3. NAVIGATION
+   AUTH / GATE SCREENS
+   ============================================================ */
+
+let gateMode = "signin", gateRole = "athlete", gateMsg = null;
+
+function showGate(html){
+  $("#gate").innerHTML = `<div class="gate">${html}</div>`;
+  $("#layout").hidden = true; $("#sidebar").hidden = true; $("#tabbar").hidden = true;
+}
+function hideGate(){
+  $("#gate").innerHTML = "";
+  $("#layout").hidden = false; $("#sidebar").hidden = false; $("#tabbar").hidden = false;
+}
+
+function setupScreen(){
+  showGate(`<div class="gate-card">
+    <div class="gate-mark"><span class="mark-badge">OM</span><span class="mark-text">Athletes<span> Portal</span></span></div>
+    <h1>Add your Supabase keys</h1>
+    <p class="lead">Open this file in an editor and replace the two values at the top of the script block.</p>
+    <div class="setup-code">const CONFIG = {
+  url:     "https://xxxxx.supabase.co",
+  anonKey: "eyJhbGciOi..."
+};</div>
+    <p class="hint">Both are in your Supabase dashboard under Settings &rsaquo; API. Use the <b>anon / public</b> key — never the service_role key, which bypasses all security.</p>
+  </div>`);
+}
+
+function authScreen(){
+  const err = gateMsg ? `<div class="gate-${gateMsg.ok?"ok":"err"}">${esc(gateMsg.text)}</div>` : "";
+  showGate(`<div class="gate-card">
+    <div class="gate-mark"><span class="mark-badge">OM</span><span class="mark-text">Athletes<span> Portal</span></span></div>
+    <h1>${gateMode==="signin"?"Sign in":"Create your account"}</h1>
+    <p class="lead">${gateMode==="signin"?"Welcome back.":"Athletes and guardians can sign up here. Staff accounts are created by OMA."}</p>
+    ${err}
+    ${gateMode==="signup"?`
+      <div class="roleopts">
+        <button class="roleopt" data-act="gate-role" data-id="athlete" aria-pressed="${gateRole==="athlete"}">
+          <b>I'm the athlete</b><span>Build my profile</span></button>
+        <button class="roleopt" data-act="gate-role" data-id="guardian" aria-pressed="${gateRole==="guardian"}">
+          <b>I'm a parent</b><span>Oversee my athlete</span></button>
+      </div>
+      <div class="f"><label for="g-name">Full name</label><input id="g-name" autocomplete="name"></div>`:""}
+    <div class="f"><label for="g-email">Email</label><input id="g-email" type="email" autocomplete="email"></div>
+    <div class="f"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="${gateMode==="signin"?"current-password":"new-password"}"></div>
+    <button class="btn btn-primary" data-act="${gateMode==="signin"?"do-signin":"do-signup"}">
+      ${gateMode==="signin"?"Sign in":"Create account"}</button>
+    <p class="gate-switch">${gateMode==="signin"
+      ? `No account yet? <button data-act="gate-switch" data-id="signup">Sign up</button>`
+      : `Already have one? <button data-act="gate-switch" data-id="signin">Sign in</button>`}</p>
+  </div>`);
+}
+
+function onboardScreen(){
+  showGate(`<div class="gate-card">
+    <div class="gate-mark"><span class="mark-badge">OM</span><span class="mark-text">Athletes<span> Portal</span></span></div>
+    <h1>Let's build your file</h1>
+    <p class="lead">Just the basics for now — you can fill in everything else once you're inside.</p>
+    <div class="f"><label for="o-first">First name</label><input id="o-first"></div>
+    <div class="f"><label for="o-last">Last name</label><input id="o-last"></div>
+    <div class="f"><label for="o-sport">Sport</label><input id="o-sport" placeholder="Basketball"></div>
+    <div class="f"><label for="o-school">School</label><input id="o-school" placeholder="Marist Preparatory"></div>
+    <button class="btn btn-primary" data-act="create-athlete">Create my profile</button>
+  </div>`);
+}
+
+function unlinkedScreen(){
+  showGate(`<div class="gate-card">
+    <div class="gate-mark"><span class="mark-badge">OM</span><span class="mark-text">Athletes<span> Portal</span></span></div>
+    <h1>You're not linked yet</h1>
+    <p class="lead">Your athlete needs to link this account before you can see their file. Ask them to open Settings and add you using this email:</p>
+    <div class="setup-code">${esc(state.profile?.email||"")}</div>
+    <button class="btn" data-act="reload">Check again</button>
+    <p class="gate-switch"><button data-act="signout">Sign out</button></p>
+  </div>`);
+}
+
+/* ============================================================
+   NAV
    ============================================================ */
 
 const NAV_ATHLETE = [
-  {id:"dashboard", label:"Dashboard", icon:"home",    tab:true},
-  {id:"profile",   label:"Profile",   icon:"user"},
-  {id:"mediakit",  label:"Media kit", icon:"kit",     tab:true},
-  {id:"gallery",   label:"Gallery",   icon:"gallery"},
-  {id:"outreach",  label:"Outreach",  icon:"mail",    tab:true},
-  {id:"deals",     label:"Deals",     icon:"deals",   tab:true},
-  {id:"brands",    label:"Brands",    icon:"brands"},
-  {id:"messages",  label:"Messages",  icon:"chat"}
+  {id:"dashboard",label:"Dashboard",icon:"home",tab:true},
+  {id:"profile",  label:"Profile",  icon:"user"},
+  {id:"mediakit", label:"Media kit",icon:"kit",tab:true},
+  {id:"gallery",  label:"Gallery",  icon:"gallery"},
+  {id:"outreach", label:"Outreach", icon:"mail",tab:true},
+  {id:"deals",    label:"Deals",    icon:"deals",tab:true},
+  {id:"brands",   label:"Brands",   icon:"brands"},
+  {id:"messages", label:"Messages", icon:"chat"},
+  {id:"settings", label:"Settings", icon:"lock"}
 ];
-
-const NAV_PARENT = [
-  {id:"p-dashboard", label:"Overview",  icon:"home",  tab:true},
-  {id:"p-approvals", label:"Approvals", icon:"check", tab:true},
-  {id:"p-earnings",  label:"Earnings",  icon:"deals", tab:true},
-  {id:"p-messages",  label:"Messages",  icon:"chat",  tab:true},
-  {id:"p-privacy",   label:"Privacy",   icon:"lock"}
+const NAV_GUARDIAN = [
+  {id:"dashboard",label:"Overview", icon:"home",tab:true},
+  {id:"approvals",label:"Approvals",icon:"check",tab:true},
+  {id:"earnings", label:"Earnings", icon:"deals",tab:true},
+  {id:"messages", label:"Messages", icon:"chat",tab:true}
 ];
-
 const NAV_ADMIN = [
-  {id:"a-roster",    label:"Roster",    icon:"user",   tab:true},
-  {id:"a-campaigns", label:"Campaigns", icon:"mail",   tab:true},
-  {id:"a-funding",   label:"Funding",   icon:"deals",  tab:true},
-  {id:"a-crm",       label:"Brands",    icon:"brands", tab:true},
-  {id:"a-athlete",   label:"Athlete file", icon:"kit"}
+  {id:"roster",   label:"Roster",   icon:"user",tab:true},
+  {id:"athlete",  label:"Athlete",  icon:"kit",tab:true},
+  {id:"outreach", label:"Outreach", icon:"mail",tab:true},
+  {id:"funding",  label:"Funding",  icon:"deals",tab:true},
+  {id:"crm",      label:"Brands",   icon:"brands"}
 ];
-
-const ROLES = {
-  athlete:{label:"Athlete",         who:"Jayda Whitmore",  nav:NAV_ATHLETE, home:"dashboard",  group:"Your portal"},
-  parent: {label:"Parent/guardian", who:"Renée Whitmore",  nav:NAV_PARENT,  home:"p-dashboard",group:"Guardian view"},
-  admin:  {label:"OMA staff",       who:"Tasha Boyd",      nav:NAV_ADMIN,   home:"a-roster",   group:"Agency tools"}
-};
-
-function roleOf(route){
-  if(route.startsWith("p-")) return "parent";
-  if(route.startsWith("a-")) return "admin";
-  // Staff opening an athlete's media kit or gallery stay in the admin portal —
-  // §5.2 gives them full edit access to any athlete's file.
-  if(DB.role==="admin" && ["mediakit","gallery","profile"].includes(route)) return "admin";
-  return "athlete";
-}
+const navFor = r => r==="admin" ? NAV_ADMIN : r==="guardian" ? NAV_GUARDIAN : NAV_ATHLETE;
 
 function renderNav(){
-  const cur = current();
-  const role = ROLES[DB.role];
-  const nav = role.nav;
-
-  $("#sidenav").innerHTML =
-    `<p class="nav-label">${esc(role.group)}</p>` +
-    nav.map(n=>{
-      let badge = "";
-      if(n.id==="messages" || n.id==="p-messages") badge = `<span class="nav-count">2</span>`;
-      if(n.id==="p-approvals"){
-        const c = DB.deals.filter(d=>d.approval==="Awaiting approval").length;
-        if(c) badge = `<span class="nav-count">${c}</span>`;
-      }
-      return `<button class="nav-item" data-go="${n.id}" ${cur===n.id?'aria-current="page"':""}>${svg(n.icon,17)}${n.label}${badge}</button>`;
-    }).join("");
-
-  if(DB.role==="admin" && !nav.some(n=>n.id===cur)){
-    $("#sidenav").insertAdjacentHTML("beforeend",
-      `<button class="nav-item" aria-current="page" data-go="a-athlete">${svg("kit",17)}Viewing athlete file</button>`);
-  }
-
+  const nav = navFor(state.profile.role);
+  $("#sidenav").innerHTML = `<p class="nav-label">${
+    state.profile.role==="admin"?"Agency tools":state.profile.role==="guardian"?"Guardian view":"Your portal"}</p>` +
+    nav.map(n=>`<button class="nav-item" data-go="${n.id}" ${state.route===n.id?'aria-current="page"':""}>${svg(n.icon,17)}${n.label}</button>`).join("");
   const tabs = nav.filter(n=>n.tab);
-  $("#tabbar").innerHTML =
-    tabs.map(n=>`<button class="tab" data-go="${n.id}" ${cur===n.id?'aria-current="page"':""}>${svg(n.icon,21)}<span>${n.label}</span></button>`).join("") +
-    `<button class="tab" data-act="more" ${!tabs.some(t=>t.id===cur)?'aria-current="page"':""}>${svg("more",21)}<span>More</span></button>`;
-
-  $("#rolename").textContent = ROLES[DB.role].label;
+  $("#tabbar").innerHTML = tabs.map(n=>
+    `<button class="tab" data-go="${n.id}" ${state.route===n.id?'aria-current="page"':""}>${svg(n.icon,21)}<span>${n.label}</span></button>`).join("")
+    + (nav.length>tabs.length ? `<button class="tab" data-act="more" ${!tabs.some(t=>t.id===state.route)?'aria-current="page"':""}>${svg("more",21)}<span>More</span></button>` : "");
+  $("#rolename").textContent = state.profile.full_name || state.profile.email;
+  $("#rolelabel").textContent = state.profile.role==="admin"?"OMA staff":state.profile.role==="guardian"?"Guardian":"Athlete";
+  $("#topavatar").textContent = initialsOf(state.profile.full_name||state.profile.email);
 }
-
-function current(){ return (location.hash||"#dashboard").slice(1).split("?")[0]; }
-
-function go(id){
-  DB.role = roleOf(id);
-  if(current()===id){ render(); return; }
-  location.hash = "#"+id;
-}
-
-window.addEventListener("hashchange", ()=>{ render(); window.scrollTo(0,0); });
 
 /* ============================================================
-   4. VIEWS
+   BOOT
+   ============================================================ */
+
+async function boot(){
+  if(!configured){ setupScreen(); return; }
+
+  const { data:{ session } } = await sb.auth.getSession();
+  state.session = session;
+  if(!session){ authScreen(); return; }
+
+  const prof = await q(sb.from("profiles").select("*").eq("id",session.user.id).single(),"profile");
+  if(!prof){ authScreen(); return; }
+  state.profile = prof;
+
+  if(prof.role==="athlete"){
+    const rows = await q(sb.from("athlete_public").select("*").eq("profile_id",prof.id),"my athlete");
+    if(!rows || !rows.length){ onboardScreen(); return; }
+    state.athlete = rows[0]; state.athleteId = rows[0].id;
+    state.route = "dashboard";
+  }
+
+  if(prof.role==="guardian"){
+    const links = await q(sb.from("guardian_links").select("athlete_id").eq("guardian_id",prof.id),"links");
+    if(!links || !links.length){ unlinkedScreen(); return; }
+    state.wards = links.map(l=>l.athlete_id);
+    state.athleteId = state.wards[0];
+    const a = await q(sb.from("athlete_public").select("*").eq("id",state.athleteId).single(),"ward");
+    state.athlete = a;
+    state.route = "dashboard";
+  }
+
+  if(prof.role==="admin"){
+    state.roster = await q(sb.from("athletes").select("*").order("last_name"),"roster") || [];
+    state.route = "roster";
+    if(state.roster.length){ state.athleteId = state.roster[0].id; state.athlete = state.roster[0]; }
+  }
+
+  hideGate();
+  render();
+}
+
+sb?.auth.onAuthStateChange((event)=>{
+  if(event==="SIGNED_OUT"){ location.reload(); }
+});
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+async function render(){
+  renderNav();
+  const el = $("#view");
+  el.innerHTML = `<div class="loading-wrap"><div class="skel tall"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:45%"></div></div>`;
+  const fn = VIEWS[state.route] || VIEWS.dashboard;
+  try{
+    el.innerHTML = await fn();
+  }catch(err){
+    console.error(err);
+    el.innerHTML = `<div class="view"><div class="empty"><h3>Something went wrong</h3><p>${esc(err.message||"Unknown error")}</p></div></div>`;
+  }
+  window.scrollTo(0,0);
+}
+
+function go(route){ state.route = route; closeModal(); render(); }
+
+/* ============================================================
+   DATA
+   ============================================================ */
+
+const A = () => state.athleteId;
+
+const load = {
+  deals:      () => q(sb.from("deals").select("*, deliverables(*)").eq("athlete_id",A()).order("created_at",{ascending:false}),"deals"),
+  payments:   () => q(sb.from("payments").select("*").eq("athlete_id",A()).order("received_on",{ascending:false}),"payments"),
+  outreach:   () => q(sb.from("outreach").select("*").eq("athlete_id",A()).order("sent_on",{ascending:false}),"outreach"),
+  tasks:      () => q(sb.from("tasks").select("*").eq("athlete_id",A()).order("due_on"),"tasks"),
+  media:      () => q(sb.from("media").select("*").eq("athlete_id",A()).order("created_at",{ascending:false}),"media"),
+  socials:    () => q(sb.from("socials").select("*").eq("athlete_id",A()),"socials"),
+  achievements:()=> q(sb.from("achievements").select("*").eq("athlete_id",A()).order("sort_order"),"achievements"),
+  messages:   () => q(sb.from("messages").select("*").eq("athlete_id",A()).order("created_at"),"messages"),
+  brands:     () => q(sb.from("brands").select("*").order("name"),"brands"),
+  contacts:   () => q(sb.from("brand_contacts").select("*, brands(name)"),"contacts")
+};
+
+async function refreshAthlete(){
+  const tbl = state.profile.role==="admin" ? "athletes" : "athlete_public";
+  const a = await q(sb.from(tbl).select("*").eq("id",A()).single(),"athlete");
+  if(a) state.athlete = a;
+}
+
+/* ---------- reusable fragments ---------- */
+const empty = (title, line, btn="") =>
+  `<div class="empty"><h3>${esc(title)}</h3><p>${esc(line)}</p>${btn}</div>`;
+
+const pageHead = (h1, p, right="") =>
+  `<div class="page-head"><div class="grow"><h1>${esc(h1)}</h1><p>${esc(p)}</p></div>${right}</div>`;
+
+/* ============================================================
+   VIEWS
    ============================================================ */
 
 const VIEWS = {};
 
-/* ---------- 4.1 Dashboard ---------- */
-VIEWS.dashboard = () => {
-  const a = DB.athlete;
-  const pct = profileCompletion();
+/* ---------- dashboard (athlete + guardian) ---------- */
+VIEWS.dashboard = async () => {
+  if(state.profile.role==="guardian") return guardianOverview();
+  const a = state.athlete;
+  const [deals, payments, tasks, socials] = await Promise.all([load.deals(), load.payments(), load.tasks(), load.socials()]);
+  const reach = (socials||[]).reduce((s,x)=>s+(x.followers||0),0);
+  const earned = (payments||[]).reduce((s,p)=>s+p.amount_cents,0);
+  const live = (deals||[]).filter(d=>["Signed","Active","Pending"].includes(d.status)).length;
+  const pct = completion(a, socials);
   const dash = 2*Math.PI*22;
-  const active = DB.deals.filter(d=>["Signed","Active","Pending"].includes(d.status)).length;
-  const earned = DB.payments.reduce((s,p)=>s+p.amt,0);
-  const open = DB.tasks.filter(t=>!t.done);
 
-  return `
-  <section class="view">
+  return `<section class="view">
     <article class="playercard">
-      <span class="pc-num">${esc(a.number)}</span>
+      ${a.jersey_number?`<span class="pc-num">${esc(a.jersey_number)}</span>`:""}
       <div class="pc-top">
-        <div class="pc-portrait">${initials()}</div>
-        <div>
-          <h1 class="pc-name">${esc(a.first)}<br>${esc(a.last)}</h1>
-          <p class="pc-meta">${esc(a.position)} · ${esc(a.school)} · ${esc(a.classYear)}</p>
-        </div>
+        <div class="pc-portrait">${initialsOf(a.first_name+" "+a.last_name)}</div>
+        <div><h1 class="pc-name">${esc(a.first_name)}<br>${esc(a.last_name)}</h1>
+        <p class="pc-meta">${[a.position,a.school,a.class_year].filter(Boolean).map(esc).join(" · ")||"Finish your profile"}</p></div>
       </div>
       <div class="pc-stats">
-        <div class="pc-stat"><b>${compact(totalReach())}</b><span>Total reach</span></div>
-        <div class="pc-stat"><b>${a.engagement}</b><span>Engagement</span></div>
-        <div class="pc-stat"><b>${active}</b><span>Deals in play</span></div>
+        <div class="pc-stat"><b>${compact(reach)}</b><span>Total reach</span></div>
+        <div class="pc-stat"><b>${esc(a.engagement_rate||"—")}</b><span>Engagement</span></div>
+        <div class="pc-stat"><b>${live}</b><span>Deals in play</span></div>
       </div>
       <div class="pc-progress">
         <svg class="ring" viewBox="0 0 52 52" aria-hidden="true">
           <circle class="bg" cx="26" cy="26" r="22"/>
-          <circle class="fg" cx="26" cy="26" r="22"
-            stroke-dasharray="${dash}" stroke-dashoffset="${dash*(1-pct/100)}"
-            transform="rotate(-90 26 26)"/>
-          <text x="26" y="31">${pct}</text>
-        </svg>
-        <p><b>Your profile is ${pct}% complete</b>${pct<100?"Add your audience demographics to finish it — brands ask for that number first.":"Everything brands ask for is filled in."}</p>
+          <circle class="fg" cx="26" cy="26" r="22" stroke-dasharray="${dash}" stroke-dashoffset="${dash*(1-pct/100)}" transform="rotate(-90 26 26)"/>
+          <text x="26" y="31">${pct}</text></svg>
+        <p><b>Your profile is ${pct}% complete</b>${pct<100?"Brands ask for your reach and audience first.":"Everything brands ask for is filled in."}</p>
       </div>
     </article>
 
     <div class="strip">
-      <div><b>${money(earned)}</b><span>Earned to date</span></div>
-      <div><b>${money(DB.deals.filter(d=>d.status!=="Paid"&&d.status!=="Completed").reduce((s,d)=>s+d.value,0))}</b><span>In the pipeline</span></div>
-      <div><b>${DB.outreach.filter(o=>["Sent","Opened","Replied"].includes(o.status)).length}</b><span>Live conversations</span></div>
+      <div><b>${cents(earned)}</b><span>Earned to date</span></div>
+      <div><b>${cents((deals||[]).filter(d=>!["Paid","Completed"].includes(d.status)).reduce((s,d)=>s+d.value_cents,0))}</b><span>In the pipeline</span></div>
+      <div><b>${(await load.outreach()||[]).filter(o=>["Sent","Opened","Replied"].includes(o.status)).length}</b><span>Live conversations</span></div>
     </div>
 
     <div class="quick">
-      <button data-go="mediakit">${svg("kit",20)}View media kit</button>
+      <button data-go="mediakit">${svg("kit",20)}Media kit</button>
       <button data-act="upload">${svg("upload",20)}Add a photo</button>
-      <button data-act="new-email">${svg("spark",20)}Start outreach</button>
+      <button data-act="new-outreach">${svg("spark",20)}Start outreach</button>
     </div>
 
     <div class="panel">
-      <div class="panel-head">
-        <h2 class="grow">Next up</h2>
-        <button class="btn btn-ghost btn-sm" data-act="add-task">${svg("plus",15)}Add</button>
-      </div>
-      ${open.length ? `<div class="rows">${DB.tasks.map(t=>`
+      <div class="panel-head"><h2 class="grow">Next up</h2>
+        <button class="btn btn-ghost btn-sm" data-act="add-task">${svg("plus",15)}Add</button></div>
+      ${(tasks||[]).length ? `<div class="rows">${tasks.map(t=>`
         <div class="row">
-          <button class="tick ${t.done?"done":""}" data-act="toggle-task" data-id="${t.id}" aria-pressed="${t.done}" aria-label="Mark complete">${svg("check",13)}</button>
-          <span class="grow"><b style="${t.done?"text-decoration:line-through;opacity:.5":""}">${esc(t.label)}</b><small>${esc(t.due)}</small></span>
+          <button class="tick ${t.done?"done":""}" data-act="toggle-task" data-id="${t.id}" data-done="${t.done}" aria-label="Mark complete">${svg("check",13)}</button>
+          <span class="grow"><b style="${t.done?"text-decoration:line-through;opacity:.5":""}">${esc(t.label)}</b><small>${t.due_on?"Due "+fmt(t.due_on):"No date"}</small></span>
         </div>`).join("")}</div>`
-      : `<div class="empty"><h3>Nothing due</h3><p>New tasks appear here when a deal is signed or a deliverable is scheduled.</p></div>`}
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Recent activity</h2>
-        <button class="btn btn-ghost btn-sm" data-go="outreach">See all</button></div>
-      <div class="rows">
-        ${DB.activity.map(x=>`
-        <div class="row">
-          <span class="brandmark ${x.kind==="paid"?"g":x.kind==="opened"?"i":""}">${esc(x.who.slice(0,2).toUpperCase())}</span>
-          <span class="grow"><b>${esc(x.who)}</b><small>${esc(x.what)}</small></span>
-          <small class="hint">${esc(x.when)}</small>
-        </div>`).join("")}
-      </div>
+      : empty("Nothing due","Add a reminder, or one will appear when a deal is signed.",
+              `<button class="btn btn-primary" data-act="add-task">${svg("plus",15)}Add a task</button>`)}
     </div>
   </section>`;
 };
 
-function profileCompletion(){
-  const a = DB.athlete;
-  const checks = [a.first, a.school, a.sport, a.height, a.gpa, a.hometown,
-                  a.bioLong, a.achievements.length, a.socials.length,
-                  a.engagement, a.guardian.email, a.interests.length,
-                  a.availability, a.audience, a.nickname];
-  const filled = checks.filter(Boolean).length;
-  return Math.round(filled/checks.length*100);
+function completion(a, socials){
+  const checks = [a.first_name,a.last_name,a.school,a.sport,a.position,a.height,a.gpa,
+                  a.hometown,a.bio_long,a.engagement_rate,a.audience_note,a.availability,
+                  (socials||[]).length, a.class_year, a.jersey_number];
+  return Math.round(checks.filter(Boolean).length/checks.length*100);
 }
 
-/* ---------- 4.2 Profile ---------- */
-VIEWS.profile = () => {
-  const a = DB.athlete;
-  const f = (label,val,extra="") =>
-    `<div class="field"><dt>${esc(label)}</dt><dd>${val}</dd><span class="lock">${extra}</span></div>`;
-
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>Profile</h1>
-        <p>This is the record everything else is built from — your media kit, your pitches, your public page.</p>
-      </div>
+/* ---------- guardian overview ---------- */
+async function guardianOverview(){
+  const a = state.athlete;
+  const [deals, payments] = await Promise.all([load.deals(), load.payments()]);
+  const waiting = (deals||[]).filter(d=>d.approval==="Awaiting approval");
+  const earned = (payments||[]).reduce((s,p)=>s+p.amount_cents,0);
+  return `<section class="view">
+    ${pageHead(a.first_name+"'s account","You see everything they do here. Nothing becomes a contract without you.")}
+    ${waiting.length?`<div class="panel" style="border-color:var(--gold);background:#FEFBF3">
+      <div class="panel-head"><span class="grow"><b style="font-size:15px">${waiting.length} deal${waiting.length>1?"s":""} waiting on you</b>
+      <small class="hint" style="display:block">${esc(waiting.map(d=>d.brand_name).join(", "))}</small></span></div>
+      <button class="btn btn-gold" data-go="approvals">Review</button></div>`:""}
+    <div class="strip">
+      <div><b>${cents(earned)}</b><span>Earned to date</span></div>
+      <div><b>${(deals||[]).filter(d=>["Signed","Active"].includes(d.status)).length}</b><span>Active deals</span></div>
+      <div><b>${waiting.length}</b><span>Awaiting you</span></div>
     </div>
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">Outstanding commitments</h2></div>
+      ${(()=>{ const out=(deals||[]).filter(d=>d.approval==="Approved").flatMap(d=>(d.deliverables||[]).filter(x=>!x.done).map(x=>({...x,brand:d.brand_name})));
+        return out.length?`<div class="rows">${out.map(x=>`<div class="row"><span class="grow"><b>${esc(x.label)}</b><small>${esc(x.brand)}</small></span><span class="chip gold">To do</span></div>`).join("")}</div>`
+        : empty("Nothing outstanding","Every deliverable on approved deals is done."); })()}
+    </div>
+  </section>`;
+}
 
-    <div class="btn-row no-print" style="margin-bottom:16px">
+/* ---------- approvals (guardian) ---------- */
+VIEWS.approvals = async () => {
+  const deals = await load.deals() || [];
+  const waiting = deals.filter(d=>d.approval==="Awaiting approval");
+  const done = deals.filter(d=>d.approval!=="Awaiting approval");
+  const card = (d,pending)=>`<div class="panel" ${pending?'style="border-color:var(--gold)"':""}>
+    <div class="record-top">
+      <span class="brandmark">${initialsOf(d.brand_name)}</span>
+      <span class="grow"><b>${esc(d.brand_name||"Untitled")}</b><small>${esc(d.deal_type||"")}</small></span>
+      <span style="text-align:right"><b style="font-family:var(--f-display);font-size:20px;display:block">${cents(d.value_cents)}</b>
+      <span class="chip ${statusClass(d.approval)}">${esc(d.approval)}</span></span>
+    </div>
+    ${d.terms?`<p class="hint" style="margin:12px 0">${esc(d.terms)}</p>`:""}
+    ${(d.deliverables||[]).length?`<div class="rows" style="margin:12px 0">${d.deliverables.map(x=>
+      `<div class="row"><span class="grow"><b>${esc(x.label)}</b></span><span class="chip ${x.done?"jade":"neutral"}">${x.done?"Done":"To do"}</span></div>`).join("")}</div>`:""}
+    ${pending?`<div class="btn-row">
+      <button class="btn btn-primary" data-act="approve" data-id="${d.id}">${svg("check",15)}Approve</button>
+      <button class="btn" data-act="decline" data-id="${d.id}">Request changes</button></div>`:""}
+  </div>`;
+  return `<section class="view">
+    ${pageHead("Deal approvals","Nothing activates until you say yes.")}
+    ${waiting.length?waiting.map(d=>card(d,true)).join(""):empty("Nothing waiting","You'll see new deals here as they come in.")}
+    ${done.length?`<div class="divider"></div><h2 style="font-size:16px;margin-bottom:12px">Already decided</h2>${done.map(d=>card(d,false)).join("")}`:""}
+  </section>`;
+};
+
+/* ---------- earnings (guardian) ---------- */
+VIEWS.earnings = async () => {
+  const [payments, deals] = await Promise.all([load.payments(), load.deals()]);
+  const total = (payments||[]).reduce((s,p)=>s+p.amount_cents,0);
+  return `<section class="view">
+    ${pageHead("Earnings","Every payment received. Read-only.")}
+    <div class="strip">
+      <div><b>${cents(total)}</b><span>Received</span></div>
+      <div><b>${(payments||[]).length}</b><span>Payments</span></div>
+      <div><b>${cents((deals||[]).filter(d=>!["Paid","Completed"].includes(d.status)).reduce((s,d)=>s+d.value_cents,0))}</b><span>Committed</span></div>
+    </div>
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn" data-act="export-payments">${svg("down",16)}Export for tax records</button></div>
+    <div class="panel">${(payments||[]).length?`<div class="rows">${payments.map(p=>
+      `<div class="row"><span class="grow"><b>${esc(p.source||"Payment")}</b><small>${fmt(p.received_on)}</small></span>
+      <b style="font-family:var(--f-display);font-size:17px">${cents(p.amount_cents)}</b></div>`).join("")}</div>
+      <p class="hint" style="margin-top:12px">NIL income is taxable. Keep this export.</p>`
+      : empty("No payments yet","They'll appear here once OMA logs a payment.")}</div>
+  </section>`;
+};
+
+/* ---------- profile ---------- */
+VIEWS.profile = async () => {
+  const a = state.athlete;
+  const [socials, ach] = await Promise.all([load.socials(), load.achievements()]);
+  const f = (l,v) => `<div class="field"><dt>${esc(l)}</dt><dd>${v||'<span class="hint">Not set</span>'}</dd><span></span></div>`;
+  return `<section class="view">
+    ${pageHead("Profile","Everything else is built from this — your media kit, your pitches.")}
+    <div class="btn-row" style="margin-bottom:16px">
       <button class="btn btn-primary" data-act="edit-profile">${svg("edit",16)}Edit profile</button>
-      <button class="btn" data-act="preview-public">${svg("eye",16)}Preview as public page</button>
-      <button class="btn" data-go="mediakit">${svg("down",16)}Download as PDF</button>
-      <button class="btn" data-act="privacy">${svg("lock",16)}Privacy</button>
+      <button class="btn" data-go="mediakit">${svg("eye",16)}See media kit</button>
     </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">The basics</h2></div>
+    <div class="panel"><div class="panel-head"><h2 class="grow">The basics</h2></div>
       <dl class="fields">
-        ${f("Full name", esc(fullName()))}
-        ${f("Preferred name", esc(a.nickname))}
-        ${f("Age / date of birth", esc(a.age)+" · "+esc(a.dob))}
-        ${f("School", esc(a.school))}
-        ${f("Class year", esc(a.classYear)+" ("+esc(a.grade)+")")}
-        ${f("Sport & position", esc(a.sport)+" — "+esc(a.position)+" · "+esc(a.second))}
-        ${f("Height / weight", esc(a.height)+" · "+esc(a.weight))}
-        ${f("GPA", esc(a.gpa)+" · "+esc(a.honors), a.gpaPublic?'<span class="chip jade plain">Public</span>':'<span class="chip neutral plain">Hidden</span>')}
-        ${f("Hometown", esc(a.hometown))}
-      </dl>
-    </div>
-
+        ${f("Full name",esc(a.first_name+" "+a.last_name))}
+        ${f("Preferred name",esc(a.nickname))}
+        ${f("Jersey number",esc(a.jersey_number))}
+        ${f("School",esc(a.school))}
+        ${f("Class year",esc(a.class_year))}
+        ${f("Sport & position",[a.sport,a.position].filter(Boolean).map(esc).join(" — "))}
+        ${f("Height / weight",[a.height,a.weight].filter(Boolean).map(esc).join(" · "))}
+        ${f("GPA",a.gpa?esc(a.gpa):"")}
+        ${f("Hometown",esc(a.hometown))}
+      </dl></div>
+    <div class="panel"><div class="panel-head"><h2 class="grow">Your story</h2></div>
+      <dl class="fields">${f("Short bio",esc(a.bio_short))}${f("Long bio",esc(a.bio_long))}</dl></div>
     <div class="panel">
-      <div class="panel-head"><h2 class="grow">Your story</h2></div>
-      <p class="panel-note">Short version goes on the media kit. Long version goes on your public page.</p>
-      <dl class="fields">
-        ${f("Short bio", esc(a.bioShort))}
-        ${f("Long bio", esc(a.bioLong))}
-      </dl>
+      <div class="panel-head"><h2 class="grow">Achievements</h2>
+        <button class="btn btn-ghost btn-sm" data-act="add-achievement">${svg("plus",15)}Add</button></div>
+      ${(ach||[]).length?`<div class="rows">${ach.map(x=>`<div class="row"><span class="grow"><b>${esc(x.label)}</b></span>
+        <button class="btn btn-sm" data-act="del-achievement" data-id="${x.id}">Remove</button></div>`).join("")}</div>`
+      : empty("No achievements yet","Awards, records, rankings — brands read these first.")}
     </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Achievements & stats</h2>
-        <button class="btn btn-ghost btn-sm" data-act="edit-profile">${svg("plus",15)}Add</button></div>
-      <div class="rows">
-        ${a.achievements.map(x=>`<div class="row"><span class="grow"><b>${esc(x)}</b></span></div>`).join("")}
-      </div>
-    </div>
-
     <div class="panel">
       <div class="panel-head"><h2 class="grow">Social reach</h2>
-        <span class="chip gold">${a.engagement} engagement</span></div>
-      <div class="socials">
-        ${a.socials.map(s=>`
-          <div class="social">
-            <b>${compact(s.followers)}</b>
-            <span>${esc(s.net)} · ${esc(s.handle)}</span>
-          </div>`).join("")}
-      </div>
-      <p class="hint" style="margin-top:12px">Audience: ${esc(a.audience)}</p>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Working with brands</h2></div>
-      <dl class="fields">
-        ${f("Brand interests", a.interests.map(i=>`<span class="chip plum plain" style="margin:2px 4px 2px 0">${esc(i)}</span>`).join(""))}
-        ${f("Availability", esc(a.availability))}
-      </dl>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Guardian contact</h2></div>
-      <p class="panel-note">Jayda is under 18, so brands and contracts route through her guardian.</p>
-      <dl class="fields">
-        ${f("Name", esc(a.guardian.name)+" ("+esc(a.guardian.rel)+")")}
-        ${f("Email", esc(a.guardian.email))}
-        ${f("Phone", esc(a.guardian.phone))}
-      </dl>
+        <button class="btn btn-ghost btn-sm" data-act="add-social">${svg("plus",15)}Add</button></div>
+      ${(socials||[]).length?`<div class="socials">${socials.map(s=>`<div class="social">
+        <b>${compact(s.followers)}</b><span>${esc(s.network)} · ${esc(s.handle||"")}</span>
+        <button class="btn btn-sm" style="margin-top:8px" data-act="del-social" data-id="${s.id}">Remove</button></div>`).join("")}</div>`
+      : empty("No accounts added","Add your platforms and follower counts.")}
     </div>
   </section>`;
 };
 
-/* ---------- 4.3 Media kit ---------- */
-VIEWS.mediakit = () => {
-  const a = DB.athlete;
-  const t = DB.kitTemplate;
-  const past = DB.deals.filter(d=>["Paid","Completed","Signed"].includes(d.status));
-
-  return `
-  <section class="view">
-    <div class="page-head no-print">
-      <div class="grow">
-        <h1>Media kit</h1>
-        <p>Built from your profile. This is the one page a brand actually reads.</p>
-      </div>
-    </div>
-
-    <div class="btn-row no-print" style="margin-bottom:16px">
-      <button class="btn btn-gold" data-act="generate-kit">${svg("spark",16)}Generate media kit</button>
-      <button class="btn" data-act="preview-kit">${svg("eye",16)}Preview</button>
-      <button class="btn" data-act="download-kit">${svg("down",16)}Download PDF</button>
-      <button class="btn" data-act="share-kit">${svg("share",16)}Share link</button>
-    </div>
-
-    <div class="kit-shell">
-      <div class="kit ${t}" id="kit">
-        <header class="kit-head">
-          <p class="kit-eyebrow">${esc(a.sport)} · ${esc(a.classYear)} · ${esc(a.hometown)}</p>
-          <h2 class="kit-name">${esc(fullName())}</h2>
-          <p class="kit-sub">${esc(a.position)} at ${esc(a.school)} · #${esc(a.number)}</p>
-        </header>
-        <div class="kit-body">
-          <div class="kit-sec">
-            <h4>Who she is</h4>
-            <p>${esc(a.bioLong)}</p>
-          </div>
-          <div class="kit-sec">
-            <h4>Reach</h4>
-            <div class="kit-reach">
-              ${a.socials.map(s=>`<div><b>${compact(s.followers)}</b><span>${esc(s.net)}</span></div>`).join("")}
-              <div><b>${a.engagement}</b><span>Engagement</span></div>
-            </div>
-            <p class="hint" style="margin-top:11px">${esc(a.audience)}</p>
-          </div>
-          <div class="kit-sec">
-            <h4>On the court</h4>
-            <ul class="kit-list">${a.achievements.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-          </div>
-          <div class="kit-sec">
-            <h4>Brands she's worked with</h4>
-            <ul class="kit-list">${past.map(d=>`<li>${esc(d.brand)} — ${esc(d.type)}</li>`).join("")}</ul>
-          </div>
-        </div>
-        <footer class="kit-foot">
-          <div class="qr" aria-hidden="true"></div>
-          <div>
-            <b>Booking · ${esc(a.guardian.name)}</b>
-            <small>${esc(a.guardian.email)} · ${esc(a.guardian.phone)}</small>
-            <small>Represented by Operation Millionaire Athletes</small>
-          </div>
-        </footer>
-      </div>
-
-      <aside class="panel no-print" style="margin:0">
-        <div class="panel-head"><h2 class="grow">Template</h2></div>
-        <div class="templates" style="flex-direction:column">
-          <button class="tpl" data-act="tpl" data-id="editorial" aria-pressed="${t==="editorial"}">
-            <span class="tpl-swatch editorial"></span><b>Editorial</b><span>Magazine feature</span>
-          </button>
-          <button class="tpl" data-act="tpl" data-id="foil" aria-pressed="${t==="foil"}">
-            <span class="tpl-swatch foil"></span><b>Foil</b><span>Gold, high contrast</span>
-          </button>
-          <button class="tpl" data-act="tpl" data-id="clean" aria-pressed="${t==="clean"}">
-            <span class="tpl-swatch clean"></span><b>Clean</b><span>Light, print-friendly</span>
-          </button>
-        </div>
-        <p class="hint" style="margin-top:14px">Last generated 2 days ago. Cordial Foods has opened it 3 times.</p>
-      </aside>
-    </div>
-  </section>`;
-};
-
-/* ---------- 4.4 Gallery ---------- */
-VIEWS.gallery = () => {
-  const items = DB.activeFolder==="All" ? DB.gallery : DB.gallery.filter(g=>g.folder===DB.activeFolder);
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>Gallery</h1>
-        <p>Every photo and clip you own, sorted so you can find one in ten seconds.</p>
-      </div>
-    </div>
-
+/* ---------- media kit ---------- */
+VIEWS.mediakit = async () => {
+  const a = state.athlete;
+  const [socials, ach, deals] = await Promise.all([load.socials(), load.achievements(), load.deals()]);
+  const past = (deals||[]).filter(d=>["Paid","Completed","Signed"].includes(d.status));
+  return `<section class="view">
+    <div class="no-print">${pageHead("Media kit","Built from your profile. The one page a brand actually reads.")}
     <div class="btn-row" style="margin-bottom:16px">
-      <button class="btn btn-primary" data-act="upload">${svg("upload",16)}Upload media</button>
-      <button class="btn" data-act="new-folder">${svg("folder",16)}Create album</button>
+      <button class="btn btn-gold" data-act="print-kit">${svg("down",16)}Download PDF</button>
+    </div></div>
+    <div class="kit editorial" id="kit">
+      <header class="kit-head">
+        <p class="kit-eyebrow">${[a.sport,a.class_year,a.hometown].filter(Boolean).map(esc).join(" · ")}</p>
+        <h2 class="kit-name">${esc(a.first_name+" "+a.last_name)}</h2>
+        <p class="kit-sub">${[a.position,a.school].filter(Boolean).map(esc).join(" at ")}</p>
+      </header>
+      <div class="kit-body">
+        ${a.bio_long?`<div class="kit-sec"><h4>About</h4><p>${esc(a.bio_long)}</p></div>`:""}
+        ${(socials||[]).length?`<div class="kit-sec"><h4>Reach</h4><div class="kit-reach">
+          ${socials.map(s=>`<div><b>${compact(s.followers)}</b><span>${esc(s.network)}</span></div>`).join("")}
+          ${a.engagement_rate?`<div><b>${esc(a.engagement_rate)}</b><span>Engagement</span></div>`:""}
+        </div>${a.audience_note?`<p class="hint" style="margin-top:11px">${esc(a.audience_note)}</p>`:""}</div>`:""}
+        ${(ach||[]).length?`<div class="kit-sec"><h4>Achievements</h4>
+          <ul class="kit-list">${ach.map(x=>`<li>${esc(x.label)}</li>`).join("")}</ul></div>`:""}
+        ${past.length?`<div class="kit-sec"><h4>Brands worked with</h4>
+          <ul class="kit-list">${past.map(d=>`<li>${esc(d.brand_name)} — ${esc(d.deal_type||"")}</li>`).join("")}</ul></div>`:""}
+      </div>
+      <footer class="kit-foot"><div class="qr" aria-hidden="true"></div>
+        <div><b>Booking</b><small>${esc(state.profile.email)}</small>
+        <small>Represented by Operation Millionaire Athletes</small></div></footer>
     </div>
-
-    <div class="folders">
-      ${DB.folders.map(f=>`<button class="folder" data-act="folder" data-id="${esc(f)}" aria-pressed="${DB.activeFolder===f}">${esc(f)}</button>`).join("")}
-    </div>
-
-    ${items.length ? `
-    <div class="grid">
-      ${items.map(g=>`
-        <figure class="tile" style="margin:0">
-          <div class="tile-img ${g.cls}">
-            ${svg("gallery",26)}
-            <button class="tile-fav ${g.fav?"on":""}" data-act="fav" data-id="${g.id}" aria-pressed="${g.fav}" aria-label="Mark as favourite">${svg("star",14)}</button>
-            <span class="tile-flag chip ${statusClass(g.flag)}">${esc(g.flag)}</span>
-          </div>
-          <figcaption class="tile-meta">
-            <b>${esc(g.name)}</b>
-            <small>${esc(g.folder)} · ${esc(g.date)}</small>
-            <div class="btn-row" style="margin-top:9px">
-              <button class="btn btn-sm" data-act="to-kit" data-id="${g.id}">Send to kit</button>
-              <button class="btn btn-sm" data-act="download-media" data-id="${g.id}">${svg("down",14)}</button>
-            </div>
-          </figcaption>
-        </figure>`).join("")}
-    </div>` : `
-    <div class="empty">
-      <h3>Nothing in ${esc(DB.activeFolder)} yet</h3>
-      <p>Upload a photo and tag it to this album. Headshots and action shots are the two brands ask for.</p>
-      <button class="btn btn-primary" data-act="upload">${svg("upload",16)}Upload media</button>
-    </div>`}
   </section>`;
 };
 
-/* ---------- 4.5 Outreach ---------- */
-VIEWS.outreach = () => {
-  const rows = DB.outreach;
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>Outreach</h1>
-        <p>Every brand you've contacted, what they did with it, and when to chase them.</p>
-      </div>
-    </div>
-
+/* ---------- gallery ---------- */
+VIEWS.gallery = async () => {
+  const media = await load.media() || [];
+  let urls = {};
+  if(media.length){
+    const { data } = await sb.storage.from("media").createSignedUrls(media.map(m=>m.storage_path), 3600);
+    (data||[]).forEach((d,i)=>{ if(d.signedUrl) urls[media[i].id] = d.signedUrl; });
+  }
+  return `<section class="view">
+    ${pageHead("Gallery","Every photo and clip you own.")}
     <div class="btn-row" style="margin-bottom:16px">
-      <button class="btn btn-gold" data-act="new-email">${svg("spark",16)}Draft a new email</button>
-      <button class="btn" data-act="log-outreach">${svg("plus",16)}Log outreach manually</button>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Templates</h2></div>
-      <div class="rows">
-        ${DB.templates.map(t=>`
-          <div class="row">
-            <span class="brandmark">${svg("file",17)}</span>
-            <span class="grow"><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></span>
-            <button class="btn btn-sm" data-act="use-template" data-id="${t.id}">Use</button>
-          </div>`).join("")}
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Tracker</h2>
-        <span class="hint">${rows.filter(r=>r.status==="Replied").length} waiting on you</span></div>
-
-      <div class="table-wrap table-scroll">
-        <table class="tracker">
-          <thead><tr>
-            <th>Brand</th><th>Contact</th><th>Sent</th><th>Status</th><th>Follow up</th><th></th>
-          </tr></thead>
-          <tbody>
-            ${rows.map(r=>`
-            <tr>
-              <td><b>${esc(r.brand)}</b>${r.notes?`<small>${esc(r.notes)}</small>`:""}</td>
-              <td>${esc(r.contact)}</td>
-              <td>${esc(fmt(r.sent))}</td>
-              <td><span class="chip ${statusClass(r.status)}">${esc(r.status)}</span></td>
-              <td>${esc(r.next==="—"?"—":fmt(r.next))}</td>
-              <td style="text-align:right;white-space:nowrap">
-                <button class="btn btn-sm" data-act="set-status" data-id="${r.id}">Status</button>
-                <button class="btn btn-sm" data-act="set-reminder" data-id="${r.id}">${svg("clock",14)}</button>
-              </td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="cards-only">
-        ${rows.map(r=>`
-        <div class="record">
-          <div class="record-top">
-            <span class="brandmark">${esc(r.brand.slice(0,2).toUpperCase())}</span>
-            <span class="grow"><b>${esc(r.brand)}</b><small>${esc(r.contact)}</small></span>
-            <span class="chip ${statusClass(r.status)}">${esc(r.status)}</span>
-          </div>
-          <dl>
-            <div><dt>Sent</dt><dd>${esc(fmt(r.sent))}</dd></div>
-            <div><dt>Follow up</dt><dd>${esc(r.next==="—"?"—":fmt(r.next))}</dd></div>
-          </dl>
-          ${r.notes?`<p class="hint" style="margin-bottom:11px">${esc(r.notes)}</p>`:""}
-          <div class="btn-row">
-            <button class="btn btn-sm" data-act="set-status" data-id="${r.id}">Mark status</button>
-            <button class="btn btn-sm" data-act="set-reminder" data-id="${r.id}">${svg("clock",14)}Remind me</button>
-          </div>
-        </div>`).join("")}
-      </div>
-    </div>
+      <button class="btn btn-primary" data-act="upload">${svg("upload",16)}Upload media</button></div>
+    ${media.length?`<div class="grid">${media.map(m=>`
+      <figure class="tile" style="margin:0">
+        <div class="tile-img a" ${urls[m.id]?`style="background-image:url('${urls[m.id]}');background-size:cover;background-position:center"`:""}>
+          ${urls[m.id]?"":svg("gallery",26)}
+          <button class="tile-fav ${m.favorite?"on":""}" data-act="fav" data-id="${m.id}" data-v="${m.favorite}" aria-label="Favourite">${svg("star",14)}</button>
+          <span class="tile-flag chip ${statusClass(m.flag)}">${esc(m.flag)}</span>
+        </div>
+        <figcaption class="tile-meta"><b>${esc(m.name||"Untitled")}</b><small>${esc(m.folder)}</small>
+          <div class="btn-row" style="margin-top:9px">
+            <button class="btn btn-sm" data-act="del-media" data-id="${m.id}" data-path="${esc(m.storage_path)}">Delete</button>
+          </div></figcaption>
+      </figure>`).join("")}</div>`
+    : empty("Nothing uploaded yet","Headshots and action shots are the two brands ask for.",
+        `<button class="btn btn-primary" data-act="upload">${svg("upload",16)}Upload media</button>`)}
   </section>`;
 };
 
-function fmt(iso){
-  if(!iso || iso==="—") return "—";
-  const d = new Date(iso+"T12:00:00");
-  return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
-}
+/* ---------- outreach ---------- */
+VIEWS.outreach = async () => {
+  const rows = await load.outreach() || [];
+  return `<section class="view">
+    ${pageHead("Outreach","Every brand contacted, and when to chase them.")}
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn btn-gold" data-act="new-outreach">${svg("spark",16)}Draft an email</button>
+      <button class="btn" data-act="log-outreach">${svg("plus",16)}Log manually</button></div>
+    ${rows.length?`<div class="panel">${rows.map(r=>`
+      <div class="record">
+        <div class="record-top">
+          <span class="brandmark">${initialsOf(r.brand_name)}</span>
+          <span class="grow"><b>${esc(r.brand_name)}</b><small>${esc(r.contact||"—")}</small></span>
+          <span class="chip ${statusClass(r.status)}">${esc(r.status)}</span></div>
+        <dl><div><dt>Sent</dt><dd>${fmt(r.sent_on)}</dd></div>
+            <div><dt>Follow up</dt><dd>${fmt(r.follow_up_on)}</dd></div></dl>
+        ${r.notes?`<p class="hint" style="margin-bottom:11px">${esc(r.notes)}</p>`:""}
+        <div class="btn-row"><button class="btn btn-sm" data-act="edit-outreach" data-id="${r.id}">Update status</button></div>
+      </div>`).join("")}</div>`
+    : empty("No outreach yet","Draft your first pitch — it pulls your stats automatically.",
+        `<button class="btn btn-gold" data-act="new-outreach">${svg("spark",16)}Draft an email</button>`)}
+  </section>`;
+};
 
-/* ---------- 4.6 Deals ---------- */
-VIEWS.deals = () => {
-  const paid = DB.payments.reduce((s,p)=>s+p.amt,0);
-  const ytd = DB.payments.filter(p=>p.date.includes("2026")).reduce((s,p)=>s+p.amt,0);
-  const month = 1200;
-
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>Deals & funding</h1>
-        <p>What you've signed, what you owe them, and what's landed in the account.</p>
-      </div>
-    </div>
-
+/* ---------- deals ---------- */
+VIEWS.deals = async () => {
+  const [deals, payments] = await Promise.all([load.deals(), load.payments()]);
+  const total = (payments||[]).reduce((s,p)=>s+p.amount_cents,0);
+  return `<section class="view">
+    ${pageHead("Deals & funding","What you've signed, what you owe, what's landed.")}
     <div class="strip">
-      <div><b>${money(month)}</b><span>This month</span></div>
-      <div><b>${money(ytd)}</b><span>Year to date</span></div>
-      <div><b>${money(paid)}</b><span>Lifetime</span></div>
+      <div><b>${cents(total)}</b><span>Received</span></div>
+      <div><b>${cents((deals||[]).filter(d=>!["Paid","Completed"].includes(d.status)).reduce((s,d)=>s+d.value_cents,0))}</b><span>Pipeline</span></div>
+      <div><b>${(deals||[]).length}</b><span>Deals</span></div>
     </div>
-
     <div class="btn-row" style="margin-bottom:16px">
       <button class="btn btn-primary" data-act="add-deal">${svg("plus",16)}Add a deal</button>
-      <button class="btn" data-act="log-payment">${svg("deals",16)}Log a payment</button>
-      <button class="btn" data-act="earnings-report">${svg("down",16)}Earnings report</button>
-    </div>
-
-    ${DB.deals.map(d=>`
+      <button class="btn" data-act="log-payment">${svg("deals",16)}Log a payment</button></div>
+    ${(deals||[]).length?deals.map(d=>`
       <div class="panel">
         <div class="record-top">
-          <span class="brandmark ${d.status==="Paid"?"g":""}">${esc(d.brand.slice(0,2).toUpperCase())}</span>
-          <span class="grow"><b>${esc(d.brand)}</b><small>${esc(d.type)}</small></span>
-          <span style="text-align:right">
-            <b style="font-family:var(--f-display);font-size:20px;display:block">${money(d.value)}</b>
-            <span class="chip ${statusClass(d.status)}">${esc(d.status)}</span>
-          </span>
-        </div>
-
-        <div class="rows" style="margin:14px 0">
-          ${d.deliverables.map((x,i)=>`
-          <div class="row">
-            <button class="tick ${x.done?"done":""}" data-act="toggle-deliverable" data-id="${d.id}" data-i="${i}" aria-pressed="${x.done}" aria-label="Mark deliverable complete">${svg("check",13)}</button>
-            <span class="grow"><b style="${x.done?"text-decoration:line-through;opacity:.5":""}">${esc(x.t)}</b></span>
-          </div>`).join("")}
-        </div>
-
+          <span class="brandmark">${initialsOf(d.brand_name)}</span>
+          <span class="grow"><b>${esc(d.brand_name)}</b><small>${esc(d.deal_type||"")}</small></span>
+          <span style="text-align:right"><b style="font-family:var(--f-display);font-size:20px;display:block">${cents(d.value_cents)}</b>
+          <span class="chip ${statusClass(d.status)}">${esc(d.status)}</span></span></div>
+        <p class="hint" style="margin:10px 0"><span class="chip ${statusClass(d.approval)}">${esc(d.approval)}</span></p>
+        ${(d.deliverables||[]).length?`<div class="rows" style="margin:12px 0">${d.deliverables.map(x=>`
+          <div class="row"><button class="tick ${x.done?"done":""}" data-act="toggle-deliverable" data-id="${x.id}" data-v="${x.done}" aria-label="Complete">${svg("check",13)}</button>
+          <span class="grow"><b style="${x.done?"text-decoration:line-through;opacity:.5":""}">${esc(x.label)}</b></span></div>`).join("")}</div>`:""}
         <div class="btn-row">
-          ${d.contract
-            ? `<button class="btn btn-sm" data-act="view-contract" data-id="${d.id}">${svg("file",14)}${esc(d.contract)}</button>`
-            : `<button class="btn btn-sm" data-act="upload-contract" data-id="${d.id}">${svg("upload",14)}Upload contract</button>`}
-          <button class="btn btn-sm" data-act="log-payment" data-id="${d.id}">Log payment</button>
-          <span class="hint" style="margin-left:auto;align-self:center">${d.status==="Paid"?"Paid "+esc(d.paid):"Expected "+esc(d.paid)}</span>
+          <button class="btn btn-sm" data-act="add-deliverable" data-id="${d.id}">${svg("plus",14)}Deliverable</button>
+          <button class="btn btn-sm" data-act="log-payment" data-id="${d.id}" data-amt="${d.value_cents}" data-brand="${esc(d.brand_name)}">Log payment</button>
         </div>
-      </div>`).join("")}
+      </div>`).join("")
+    : empty("No deals yet","Add your first one — your guardian gets asked to approve it.",
+        `<button class="btn btn-primary" data-act="add-deal">${svg("plus",16)}Add a deal</button>`)}
+    ${(payments||[]).length?`<div class="panel"><div class="panel-head"><h2 class="grow">Payments received</h2></div>
+      <div class="rows">${payments.map(p=>`<div class="row"><span class="grow"><b>${esc(p.source||"Payment")}</b><small>${fmt(p.received_on)}</small></span>
+      <b style="font-family:var(--f-display);font-size:17px">${cents(p.amount_cents)}</b></div>`).join("")}</div></div>`:""}
+  </section>`;
+};
 
+/* ---------- brands ---------- */
+VIEWS.brands = async () => {
+  const brands = await load.brands() || [];
+  return `<section class="view">
+    ${pageHead("Brands","Who OMA works with, and what each is looking for.")}
+    ${brands.length?brands.map(b=>`<div class="panel">
+      <div class="record-top"><span class="brandmark">${initialsOf(b.name)}</span>
+        <span class="grow"><b>${esc(b.name)}</b><small>${esc(b.category||"")}</small></span>
+        <span class="chip ${statusClass(b.status)}">${esc(b.status)}</span></div>
+      ${b.looks_for?`<p class="hint" style="margin-top:10px">${esc(b.looks_for)}</p>`:""}
+    </div>`).join("")
+    : empty("No brands yet","OMA staff add brands to the directory.")}
+  </section>`;
+};
+
+/* ---------- messages ---------- */
+VIEWS.messages = async () => {
+  const msgs = await load.messages() || [];
+  const lane = state.profile.role==="guardian" ? "guardian" : "athlete";
+  return `<section class="view">
+    ${pageHead("Messages","Direct line to the OMA team.")}
     <div class="panel">
-      <div class="panel-head"><h2 class="grow">Payments received</h2></div>
-      <div class="rows">
-        ${DB.payments.map(p=>`
-        <div class="row">
-          <span class="grow"><b>${esc(p.src)}</b><small>${esc(p.date)}</small></span>
-          <b style="font-family:var(--f-display);font-size:17px">${money(p.amt)}</b>
-        </div>`).join("")}
+      <div class="thread" id="thread">
+        ${msgs.length?msgs.map(m=>`<div class="msg ${m.sender_id===state.profile.id?"me":"them"}">${esc(m.body)}
+          <small>${new Date(m.created_at).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}</small></div>`).join("")
+        : `<p class="hint">No messages yet.</p>`}
+      </div>
+      <div class="composer">
+        <textarea id="msg" rows="1" placeholder="Write a message" aria-label="Message"></textarea>
+        <button class="btn btn-primary" data-act="send-msg" data-lane="${lane}" aria-label="Send">${svg("send",17)}</button>
       </div>
     </div>
   </section>`;
 };
 
-/* ---------- 4.7 Brands ---------- */
-VIEWS.brands = () => `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>Brands</h1>
-        <p>Who OMA has relationships with, and what each of them is actually looking for.</p>
-      </div>
-    </div>
-    ${DB.brands.map(b=>`
-      <div class="panel">
-        <div class="record-top">
-          <span class="brandmark ${b.cls}">${esc(b.mark)}</span>
-          <span class="grow"><b>${esc(b.name)}</b><small>${esc(b.cat)}</small></span>
-          <span class="chip ${statusClass(b.status)}">${esc(b.status)}</span>
-        </div>
-        <p class="hint" style="margin:10px 0 12px">${esc(b.looks)}</p>
-        <div class="btn-row">
-          <button class="btn btn-sm btn-primary" data-act="request-intro" data-id="${esc(b.name)}">Request an introduction</button>
-          <button class="btn btn-sm" data-act="brand-profile" data-id="${esc(b.name)}">View brand</button>
-        </div>
-      </div>`).join("")}
-  </section>`;
-
-/* ---------- 4.8 Messages ---------- */
-VIEWS.messages = () => `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>Messages</h1>
-        <p>Your agent, and everything the system wants you to know about.</p>
-      </div>
-    </div>
-
+/* ---------- settings (athlete) ---------- */
+VIEWS.settings = async () => {
+  const links = await q(sb.from("guardian_links").select("guardian_id, relationship, profiles!guardian_links_guardian_id_fkey(full_name,email)").eq("athlete_id",A()),"links") || [];
+  return `<section class="view">
+    ${pageHead("Settings","Your account and who can see your file.")}
     <div class="panel">
-      <div class="panel-head">
-        <span class="brandmark">TB</span>
-        <span class="grow"><b>Tasha Boyd</b><small class="hint">Your OMA agent</small></span>
-      </div>
-      <div class="thread" id="thread">
-        ${DB.messages.map(m=>`
-          <div class="msg ${m.from==="me"?"me":"them"}">
-            ${esc(m.text)}<small>${esc(m.at)}</small>
-          </div>`).join("")}
-      </div>
-      <div class="composer">
-        <textarea id="msg" rows="1" placeholder="Message Tasha" aria-label="Message"></textarea>
-        <button class="btn btn-primary" data-act="send-msg" aria-label="Send">${svg("send",17)}</button>
-      </div>
+      <div class="panel-head"><h2 class="grow">Guardians</h2>
+        <button class="btn btn-ghost btn-sm" data-act="link-guardian">${svg("link",15)}Link</button></div>
+      <p class="panel-note">A guardian can see your deals and earnings, and must approve deals before they activate.</p>
+      ${links.length?`<div class="rows">${links.map(l=>`<div class="row">
+        <span class="grow"><b>${esc(l.profiles?.full_name||"Guardian")}</b><small>${esc(l.profiles?.email||"")}</small></span>
+        <button class="btn btn-sm" data-act="unlink-guardian" data-id="${l.guardian_id}">Remove</button></div>`).join("")}</div>`
+      : empty("No guardian linked","They need to create an account first, then you link them by email.",
+          `<button class="btn btn-primary" data-act="link-guardian">${svg("link",15)}Link a guardian</button>`)}
     </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Notifications</h2></div>
-      <div class="rows">
-        ${DB.notifications.map(n=>`
-        <div class="row">
-          <span class="grow"><b>${esc(n.text)}</b><small>${esc(n.when)}</small></span>
-        </div>`).join("")}
-      </div>
-    </div>
-  </section>`;
-
-/* ---------- 4.9 Settings ---------- */
-VIEWS.settings = () => `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Settings</h1><p>Account, alerts, and who gets to see what.</p></div>
-    </div>
-
     <div class="panel">
       <div class="panel-head"><h2 class="grow">Account</h2></div>
-      <div class="form-grid two">
-        <div class="f"><label for="s-email">Email</label><input id="s-email" value="jayda.whitmore@email.com"></div>
-        <div class="f"><label for="s-phone">Phone</label><input id="s-phone" value="(404) 555-0142"></div>
-        <div class="f span"><label for="s-pass">Password</label><input id="s-pass" type="password" value="............."></div>
-      </div>
-      <div class="btn-row" style="margin-top:14px">
-        <button class="btn btn-primary" data-act="save-settings">Save changes</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Notifications</h2></div>
-      <div class="rows">
-        ${[["A brand opens your media kit",true],["A payment clears",true],["A follow-up is due",true],["Weekly summary email",false]]
-          .map(([l,on],i)=>`
-          <div class="row">
-            <span class="grow"><b>${esc(l)}</b></span>
-            <button class="tick ${on?"done":""}" data-act="toggle-notif" data-i="${i}" aria-pressed="${on}" aria-label="Toggle">${svg("check",13)}</button>
-          </div>`).join("")}
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Privacy</h2></div>
-      <p class="panel-note">Your guardian can change these too.</p>
-      <div class="btn-row">
-        <button class="btn" data-act="privacy">${svg("lock",16)}What the public sees</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="btn-row"><button class="btn" data-act="logout">${svg("logout",16)}Log out</button></div>
-    </div>
-  </section>`;
-
-/* ============================================================
-   4b. PARENT PORTAL
-   ============================================================ */
-
-VIEWS["p-dashboard"] = () => {
-  const a = DB.athlete;
-  const waiting = DB.deals.filter(d=>d.approval==="Awaiting approval");
-  const earned = DB.payments.reduce((s,p)=>s+p.amt,0);
-  const active = DB.deals.filter(d=>["Signed","Active"].includes(d.status)).length;
-
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>${esc(a.first)}'s account</h1>
-        <p>You see everything she does here. Nothing becomes a contract without you.</p>
-      </div>
-    </div>
-
-    ${waiting.length ? `
-    <div class="panel" style="border-color:var(--gold);background:#FEFBF3">
-      <div class="panel-head">
-        <span class="grow"><b style="font-size:15px">${waiting.length} deal${waiting.length>1?"s":""} waiting on you</b>
-        <small class="hint" style="display:block">${esc(waiting.map(d=>d.brand).join(", "))}</small></span>
-      </div>
-      <button class="btn btn-gold" data-go="p-approvals">Review ${waiting.length>1?"them":"it"}</button>
-    </div>` : ""}
-
-    <div class="strip">
-      <div><b>${money(earned)}</b><span>Earned to date</span></div>
-      <div><b>${active}</b><span>Active deals</span></div>
-      <div><b>${compact(totalReach())}</b><span>Total reach</span></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">What she's been doing</h2></div>
-      <div class="rows">
-        ${DB.activity.map(x=>`
-        <div class="row">
-          <span class="brandmark ${x.kind==="paid"?"g":x.kind==="opened"?"i":""}">${esc(x.who.slice(0,2).toUpperCase())}</span>
-          <span class="grow"><b>${esc(x.who)}</b><small>${esc(x.what)}</small></span>
-          <small class="hint">${esc(x.when)}</small>
-        </div>`).join("")}
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Commitments she's made</h2>
-        <button class="btn btn-ghost btn-sm" data-go="p-approvals">All deals</button></div>
-      <div class="rows">
-        ${DB.deals.filter(d=>d.approval==="Approved").flatMap(d=>
-          d.deliverables.filter(x=>!x.done).map(x=>`
-          <div class="row">
-            <span class="grow"><b>${esc(x.t)}</b><small>${esc(d.brand)}</small></span>
-            <span class="chip gold">Outstanding</span>
-          </div>`)).join("") || `<div class="row"><span class="grow"><b>Nothing outstanding</b><small>Every deliverable is done.</small></span></div>`}
-      </div>
+      <dl class="fields">
+        <div class="field"><dt>Email</dt><dd>${esc(state.profile.email)}</dd><span></span></div>
+        <div class="field"><dt>Role</dt><dd>Athlete</dd><span></span></div>
+      </dl>
+      <div class="btn-row" style="margin-top:14px"><button class="btn" data-act="signout">Sign out</button></div>
     </div>
   </section>`;
 };
 
-VIEWS["p-approvals"] = () => {
-  const waiting = DB.deals.filter(d=>d.approval==="Awaiting approval");
-  const done = DB.deals.filter(d=>d.approval!=="Awaiting approval");
-
-  const card = (d,pending) => `
-    <div class="panel" ${pending?'style="border-color:var(--gold)"':""}>
-      <div class="record-top">
-        <span class="brandmark ${d.status==="Paid"?"g":""}">${esc(d.brand.slice(0,2).toUpperCase())}</span>
-        <span class="grow"><b>${esc(d.brand)}</b><small>${esc(d.type)}</small></span>
-        <span style="text-align:right">
-          <b style="font-family:var(--f-display);font-size:20px;display:block">${money(d.value)}</b>
-          <span class="chip ${pending?"gold":"jade"}">${esc(d.approval)}</span>
-        </span>
-      </div>
-      ${d.terms?`<p class="hint" style="margin:12px 0">${esc(d.terms)}</p>`:""}
-      <div class="rows" style="margin:12px 0">
-        ${d.deliverables.map(x=>`<div class="row"><span class="grow"><b>${esc(x.t)}</b></span>
-          <span class="chip ${x.done?"jade":"neutral"}">${x.done?"Done":"To do"}</span></div>`).join("")}
-      </div>
-      ${pending ? `
-        <div class="btn-row">
-          <button class="btn btn-primary" data-act="approve-deal" data-id="${d.id}">${svg("check",15)}Approve</button>
-          <button class="btn" data-act="request-changes" data-id="${d.id}">Request changes</button>
-        </div>`
-      : `<p class="hint">${d.contract?"Contract on file: "+esc(d.contract):"No contract uploaded yet."}</p>`}
-    </div>`;
-
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>Deal approvals</h1>
-        <p>Jayda is 17, so nothing activates until you say yes.</p>
-      </div>
-    </div>
-    ${waiting.length ? waiting.map(d=>card(d,true)).join("")
-      : `<div class="empty"><h3>Nothing waiting</h3><p>You'll get an email the moment a new deal needs your sign-off.</p></div>`}
-    <div class="divider"></div>
-    <h2 style="font-size:16px;margin-bottom:12px">Already approved</h2>
-    ${done.map(d=>card(d,false)).join("")}
-  </section>`;
-};
-
-VIEWS["p-earnings"] = () => {
-  const total = DB.payments.reduce((s,p)=>s+p.amt,0);
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Earnings</h1><p>Every dollar in, and where it came from. Read-only.</p></div>
-    </div>
-    <div class="strip">
-      <div><b>${money(total)}</b><span>Received</span></div>
-      <div><b>${DB.payments.length}</b><span>Payments</span></div>
-      <div><b>${money(DB.deals.filter(d=>!["Paid","Completed"].includes(d.status)).reduce((s,d)=>s+d.value,0))}</b><span>Committed, unpaid</span></div>
-    </div>
-    <div class="btn-row" style="margin-bottom:16px">
-      <button class="btn" data-act="export-report">${svg("down",16)}Export for tax records</button>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Payments received</h2></div>
-      <div class="rows">
-        ${DB.payments.map(p=>`
-        <div class="row"><span class="grow"><b>${esc(p.src)}</b><small>${esc(p.date)}</small></span>
-        <b style="font-family:var(--f-display);font-size:17px">${money(p.amt)}</b></div>`).join("")}
-      </div>
-      <p class="hint" style="margin-top:12px">NIL income is taxable. Keep this export for your records.</p>
-    </div>
-  </section>`;
-};
-
-VIEWS["p-messages"] = () => `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Messages</h1><p>Direct line to the OMA team.</p></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head">
-        <span class="brandmark">TB</span>
-        <span class="grow"><b>Tasha Boyd</b><small class="hint">Jayda's OMA agent</small></span>
-      </div>
-      <div class="thread">
-        <div class="msg them">Hi Renée — Cordial Foods came in with an appearance offer. It's in your approvals queue. No exclusivity, travel covered.<small>8:40 AM</small></div>
-        <div class="msg me">Thanks. Is the Nov 8 date a school day?<small>9:02 AM</small></div>
-        <div class="msg them">Saturday. I checked before sending it over.<small>9:05 AM</small></div>
-      </div>
-      <div class="composer">
-        <textarea id="msg" rows="1" placeholder="Message Tasha" aria-label="Message"></textarea>
-        <button class="btn btn-primary" data-act="send-msg" aria-label="Send">${svg("send",17)}</button>
-      </div>
-    </div>
-  </section>`;
-
-VIEWS["p-privacy"] = () => `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Privacy</h1><p>What the public can see on Jayda's profile. You can change any of it.</p></div>
-    </div>
-    <div class="panel">
-      <div class="rows">
-        ${[["Name and sport",true,"locked"],["Bio and achievements",true,""],["Social handles and follower counts",true,""],["GPA and academic honors",DB.athlete.gpaPublic,"gpa"],["Height and weight",true,""],["Contact details",false,""],["Hometown",true,""],["School name",true,""]]
-          .map(([l,on,key])=>`
-          <div class="row">
-            <span class="grow"><b>${esc(l)}</b>${key==="locked"?'<small>Always visible</small>':""}</span>
-            <button class="tick ${on?"done":""}" ${key==="locked"?"disabled style=opacity:.45":`data-act="toggle-privacy" data-key="${key}"`} aria-pressed="${on}" aria-label="Toggle">${svg("check",13)}</button>
-          </div>`).join("")}
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Who else can see her file</h2></div>
-      <div class="rows">
-        <div class="row"><span class="grow"><b>Tasha Boyd</b><small>OMA agent — full access</small></span><span class="chip jade">Allowed</span></div>
-        <div class="row"><span class="grow"><b>OMA admin team</b><small>Roster and funding records</small></span><span class="chip jade">Allowed</span></div>
-        <div class="row"><span class="grow"><b>Brands</b><small>Only what's in the shared media kit</small></span><span class="chip neutral">Limited</span></div>
-      </div>
-    </div>
-  </section>`;
-
-/* ============================================================
-   4c. ADMIN PORTAL
-   ============================================================ */
-
-VIEWS["a-roster"] = () => {
-  const total = DB.roster.reduce((s,r)=>s+r.earned,0);
-  const flags = f => DB.roster.filter(r=>r.flag===f).length;
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Roster</h1><p>Every athlete OMA represents, and who needs attention today.</p></div>
-    </div>
-
-    <div class="strip">
-      <div><b>${DB.roster.length}</b><span>Athletes</span></div>
-      <div><b>${money(total)}</b><span>Roster earnings</span></div>
-      <div><b>${flags("Needs profile update")}</b><span>Need chasing</span></div>
-    </div>
-
+/* ---------- admin: roster ---------- */
+VIEWS.roster = async () => {
+  state.roster = await q(sb.from("athletes").select("*").order("last_name"),"roster") || [];
+  return `<section class="view">
+    ${pageHead("Roster","Every athlete OMA represents.")}
     <div class="btn-row" style="margin-bottom:16px">
       <button class="btn btn-primary" data-act="add-athlete">${svg("plus",16)}Add athlete</button>
-      <button class="btn" data-act="run-bulk">${svg("mail",16)}Run bulk outreach</button>
-      <button class="btn" data-act="export-roster">${svg("down",16)}Export report</button>
-    </div>
-
-    <div class="panel">
-      <div class="table-wrap table-scroll">
-        <table class="tracker">
-          <thead><tr><th>Athlete</th><th>Sport</th><th>School</th><th>Status</th><th>Deals</th><th>Earned</th><th></th></tr></thead>
-          <tbody>
-            ${DB.roster.map(r=>`
-            <tr>
-              <td><b>${esc(r.name)}</b><small>${esc(r.grade)}</small></td>
-              <td>${esc(r.sport)}</td>
-              <td>${esc(r.school)}</td>
-              <td><span class="chip ${statusClass(r.flag)}">${esc(r.flag)}</span></td>
-              <td>${r.deals}</td>
-              <td>${money(r.earned)}</td>
-              <td style="text-align:right"><button class="btn btn-sm" data-act="open-athlete" data-id="${r.id}">Open</button></td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-      <div class="cards-only">
-        ${DB.roster.map(r=>`
-        <div class="record">
-          <div class="record-top">
-            <span class="brandmark">${esc(r.name.split(" ").map(w=>w[0]).join(""))}</span>
-            <span class="grow"><b>${esc(r.name)}</b><small>${esc(r.sport)} · ${esc(r.school)}</small></span>
-            <span class="chip ${statusClass(r.flag)}">${esc(r.flag)}</span>
-          </div>
-          <dl>
-            <div><dt>Deals</dt><dd>${r.deals}</dd></div>
-            <div><dt>Earned</dt><dd>${money(r.earned)}</dd></div>
-          </dl>
-          <button class="btn btn-sm" data-act="open-athlete" data-id="${r.id}">Open file</button>
-        </div>`).join("")}
-      </div>
-    </div>
+      <button class="btn" data-act="export-roster">${svg("down",16)}Export CSV</button></div>
+    ${state.roster.length?`<div class="panel">${state.roster.map(r=>`
+      <div class="record">
+        <div class="record-top"><span class="brandmark">${initialsOf(r.first_name+" "+r.last_name)}</span>
+          <span class="grow"><b>${esc(r.first_name+" "+r.last_name)}</b><small>${[r.sport,r.school].filter(Boolean).map(esc).join(" · ")}</small></span>
+          <span class="chip ${statusClass(r.roster_flag)}">${esc(r.roster_flag||"Active")}</span></div>
+        <button class="btn btn-sm" data-act="open-athlete" data-id="${r.id}">Open file</button>
+      </div>`).join("")}</div>`
+    : empty("No athletes yet","Add your first athlete, or have them sign up and claim their profile.",
+        `<button class="btn btn-primary" data-act="add-athlete">${svg("plus",16)}Add athlete</button>`)}
   </section>`;
 };
 
-VIEWS["a-athlete"] = () => {
-  const r = DB.roster.find(x=>x.id===DB.openAthlete) || DB.roster[0];
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow">
-        <h1>${esc(r.name)}</h1>
-        <p>${esc(r.sport)} · ${esc(r.school)} · ${esc(r.grade)}</p>
-      </div>
-      <button class="btn" data-go="a-roster">Back to roster</button>
-    </div>
-
+/* ---------- admin: athlete file ---------- */
+VIEWS.athlete = async () => {
+  if(!state.athleteId) return `<section class="view">${empty("Pick an athlete","Open someone from the roster first.",
+    `<button class="btn btn-primary" data-go="roster">Go to roster</button>`)}</section>`;
+  await refreshAthlete();
+  const a = state.athlete;
+  const [deals, payments] = await Promise.all([load.deals(), load.payments()]);
+  const earned = (payments||[]).reduce((s,p)=>s+p.amount_cents,0);
+  return `<section class="view">
+    ${pageHead(a.first_name+" "+a.last_name, [a.sport,a.school,a.class_year].filter(Boolean).join(" · "),
+      `<button class="btn" data-go="roster">Back to roster</button>`)}
     <div class="strip">
-      <div><b>${r.deals}</b><span>Deals</span></div>
-      <div><b>${money(r.earned)}</b><span>Earned</span></div>
-      <div><b>${compact(r.reach)}</b><span>Reach</span></div>
+      <div><b>${(deals||[]).length}</b><span>Deals</span></div>
+      <div><b>${cents(earned)}</b><span>Earned</span></div>
+      <div><b>${cents(Math.round(earned*0.15))}</b><span>OMA at 15%</span></div>
     </div>
-
     <div class="btn-row" style="margin-bottom:16px">
-      <button class="btn btn-primary" data-act="edit-profile">${svg("edit",16)}Edit their profile</button>
-      <button class="btn" data-go="mediakit">${svg("kit",16)}Their media kit</button>
-      <button class="btn" data-go="gallery">${svg("gallery",16)}Their gallery</button>
+      <button class="btn btn-primary" data-act="edit-profile">${svg("edit",16)}Edit profile</button>
+      <button class="btn" data-go="mediakit">${svg("kit",16)}Media kit</button>
+      <button class="btn" data-go="deals">${svg("deals",16)}Deals</button>
     </div>
-
     <div class="panel">
-      <div class="panel-head"><h2 class="grow">Internal notes</h2>
-        <span class="chip neutral plain">Staff only</span></div>
-      <div class="f"><textarea id="a-note" style="min-height:90px">${esc(r.note)}</textarea></div>
+      <div class="panel-head"><h2 class="grow">Internal notes</h2><span class="chip neutral plain">Staff only</span></div>
+      <div class="f"><textarea id="a-note" style="min-height:90px">${esc(a.internal_note||"")}</textarea></div>
       <div class="btn-row" style="margin-top:12px">
-        <button class="btn btn-primary btn-sm" data-act="save-note" data-id="${r.id}">Save note</button>
-        <button class="btn btn-sm" data-act="set-flag" data-id="${r.id}">Change status</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Outreach on their behalf</h2></div>
-      <div class="rows">
-        ${DB.outreach.slice(0,3).map(o=>`
-        <div class="row">
-          <span class="grow"><b>${esc(o.brand)}</b><small>${esc(o.contact)}</small></span>
-          <span class="chip ${statusClass(o.status)}">${esc(o.status)}</span>
-        </div>`).join("")}
-      </div>
-      <div class="btn-row" style="margin-top:12px">
-        <button class="btn btn-sm btn-gold" data-act="new-email">${svg("spark",15)}Draft on their behalf</button>
-      </div>
+        <button class="btn btn-primary btn-sm" data-act="save-note">Save note</button>
+        <button class="btn btn-sm" data-act="set-flag">Change status</button></div>
     </div>
   </section>`;
 };
 
-VIEWS["a-campaigns"] = () => `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Campaigns</h1><p>One brief, pitched across the roster at once.</p></div>
-    </div>
-    <div class="btn-row" style="margin-bottom:16px">
-      <button class="btn btn-primary" data-act="run-bulk">${svg("plus",16)}New campaign</button>
-    </div>
-    ${DB.campaigns.map(c=>`
-      <div class="panel">
-        <div class="record-top">
-          <span class="brandmark ${c.status==="Draft"?"":"g"}">${esc(c.brand.slice(0,2).toUpperCase())}</span>
-          <span class="grow"><b>${esc(c.brand)}</b><small>${esc(c.brief)}</small></span>
-          <span class="chip ${c.status==="Active"?"gold":"neutral"}">${esc(c.status)}</span>
-        </div>
-        <div class="strip" style="margin:14px 0 12px">
-          <div><b>${c.athletes}</b><span>Athletes</span></div>
-          <div><b>${c.sent}</b><span>Sent</span></div>
-          <div><b>${c.replies}</b><span>Replies</span></div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-sm" data-act="campaign-detail" data-id="${c.id}">View responses</button>
-          ${c.status==="Draft"?`<button class="btn btn-sm btn-primary" data-act="send-campaign" data-id="${c.id}">Send to ${c.athletes} athletes</button>`:""}
-        </div>
-      </div>`).join("")}
-
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">Master outreach tracker</h2></div>
-      <div class="rows">
-        ${DB.outreach.map(o=>`
-        <div class="row">
-          <span class="grow"><b>${esc(o.brand)}</b><small>Jayda Whitmore · ${esc(fmt(o.sent))}</small></span>
-          <span class="chip ${statusClass(o.status)}">${esc(o.status)}</span>
-        </div>`).join("")}
-      </div>
-    </div>
-  </section>`;
-
-VIEWS["a-funding"] = () => {
-  const total = DB.roster.reduce((s,r)=>s+r.earned,0);
-  const commission = Math.round(total*0.15);
-  const top = DB.roster.slice().sort((a,b)=>b.earned-a.earned);
-  return `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Funding</h1><p>Everything flowing through the roster, and OMA's cut of it.</p></div>
-    </div>
+/* ---------- admin: funding ---------- */
+VIEWS.funding = async () => {
+  const rows = await q(sb.from("payments").select("athlete_id, amount_cents, source, received_on"),"all payments") || [];
+  const roster = state.roster.length ? state.roster : (await q(sb.from("athletes").select("*"),"roster") || []);
+  const byAthlete = {};
+  rows.forEach(p=>{ byAthlete[p.athlete_id] = (byAthlete[p.athlete_id]||0) + p.amount_cents; });
+  const total = rows.reduce((s,p)=>s+p.amount_cents,0);
+  return `<section class="view">
+    ${pageHead("Funding","Everything flowing through the roster.")}
     <div class="strip">
-      <div><b>${money(total)}</b><span>Roster earnings</span></div>
-      <div><b>${money(commission)}</b><span>Commission at 15%</span></div>
-      <div><b>${DB.roster.filter(r=>r.earned>0).length}</b><span>Earning athletes</span></div>
+      <div><b>${cents(total)}</b><span>Roster earnings</span></div>
+      <div><b>${cents(Math.round(total*0.15))}</b><span>Commission at 15%</span></div>
+      <div><b>${Object.keys(byAthlete).length}</b><span>Earning athletes</span></div>
     </div>
-    <div class="btn-row" style="margin-bottom:16px">
-      <button class="btn" data-act="export-roster">${svg("down",16)}Export report</button>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><h2 class="grow">By athlete</h2></div>
-      <div class="rows">
-        ${top.map(r=>`
-        <div class="row">
-          <span class="brandmark">${esc(r.name.split(" ").map(w=>w[0]).join(""))}</span>
-          <span class="grow"><b>${esc(r.name)}</b><small>${r.deals} deal${r.deals===1?"":"s"} · ${esc(r.sport)}</small></span>
-          <span style="text-align:right">
-            <b style="font-family:var(--f-display);font-size:17px;display:block">${money(r.earned)}</b>
-            <small class="hint">${money(Math.round(r.earned*0.15))} to OMA</small>
-          </span>
-        </div>`).join("")}
-      </div>
+    <div class="panel"><div class="panel-head"><h2 class="grow">By athlete</h2></div>
+      ${roster.length?`<div class="rows">${roster.map(r=>`<div class="row">
+        <span class="brandmark">${initialsOf(r.first_name+" "+r.last_name)}</span>
+        <span class="grow"><b>${esc(r.first_name+" "+r.last_name)}</b><small>${esc(r.sport||"")}</small></span>
+        <span style="text-align:right"><b style="font-family:var(--f-display);font-size:17px;display:block">${cents(byAthlete[r.id]||0)}</b>
+        <small class="hint">${cents(Math.round((byAthlete[r.id]||0)*0.15))} to OMA</small></span></div>`).join("")}</div>`
+      : empty("No athletes yet","Add athletes to the roster first.")}
     </div>
   </section>`;
 };
 
-VIEWS["a-crm"] = () => `
-  <section class="view">
-    <div class="page-head">
-      <div class="grow"><h1>Brands</h1><p>Contacts, history, and what each one keeps asking for.</p></div>
-    </div>
+/* ---------- admin: brand CRM ---------- */
+VIEWS.crm = async () => {
+  const [brands, contacts] = await Promise.all([load.brands(), load.contacts()]);
+  return `<section class="view">
+    ${pageHead("Brands","Contacts, history, and what each one asks for.")}
     <div class="btn-row" style="margin-bottom:16px">
-      <button class="btn btn-primary" data-act="add-contact">${svg("plus",16)}Add brand contact</button>
-    </div>
-    <div class="panel">
-      <div class="table-wrap table-scroll">
-        <table class="tracker">
-          <thead><tr><th>Brand</th><th>Contact</th><th>Email</th><th>Last touch</th><th>Deals</th></tr></thead>
-          <tbody>
-            ${DB.contacts.map(c=>`
-            <tr>
-              <td><b>${esc(c.brand)}</b></td>
-              <td>${esc(c.person)}<small>${esc(c.role)}</small></td>
-              <td>${esc(c.email)}</td>
-              <td>${esc(c.last)}</td>
-              <td>${c.deals}</td>
-            </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-      <div class="cards-only">
-        ${DB.contacts.map(c=>`
-        <div class="record">
-          <div class="record-top">
-            <span class="brandmark i">${esc(c.brand.slice(0,2).toUpperCase())}</span>
-            <span class="grow"><b>${esc(c.brand)}</b><small>${esc(c.person)} · ${esc(c.role)}</small></span>
-          </div>
-          <dl>
-            <div><dt>Last touch</dt><dd>${esc(c.last)}</dd></div>
-            <div><dt>Deals</dt><dd>${c.deals}</dd></div>
-          </dl>
-        </div>`).join("")}
-      </div>
-    </div>
-    ${DB.brands.map(b=>`
-      <div class="panel">
-        <div class="record-top">
-          <span class="brandmark ${b.cls}">${esc(b.mark)}</span>
-          <span class="grow"><b>${esc(b.name)}</b><small>${esc(b.cat)}</small></span>
-          <span class="chip ${statusClass(b.status)}">${esc(b.status)}</span>
-        </div>
-        <p class="hint" style="margin-top:10px">${esc(b.looks)}</p>
-      </div>`).join("")}
+      <button class="btn btn-primary" data-act="add-brand">${svg("plus",16)}Add brand</button>
+      <button class="btn" data-act="add-contact">${svg("plus",16)}Add contact</button></div>
+    ${(contacts||[]).length?`<div class="panel"><div class="panel-head"><h2 class="grow">Contacts</h2></div>
+      <div class="rows">${contacts.map(c=>`<div class="row">
+        <span class="brandmark i">${initialsOf(c.brands?.name||"?")}</span>
+        <span class="grow"><b>${esc(c.person||"—")}</b><small>${esc(c.brands?.name||"")} · ${esc(c.email||"")}</small></span></div>`).join("")}</div></div>`:""}
+    ${(brands||[]).length?brands.map(b=>`<div class="panel">
+      <div class="record-top"><span class="brandmark">${initialsOf(b.name)}</span>
+        <span class="grow"><b>${esc(b.name)}</b><small>${esc(b.category||"")}</small></span>
+        <span class="chip ${statusClass(b.status)}">${esc(b.status)}</span></div>
+      ${b.looks_for?`<p class="hint" style="margin-top:10px">${esc(b.looks_for)}</p>`:""}</div>`).join("")
+    : empty("No brands yet","Add the brands OMA has relationships with.",
+        `<button class="btn btn-primary" data-act="add-brand">${svg("plus",16)}Add brand</button>`)}
   </section>`;
+};
 
 /* ============================================================
-   5. RENDER
+   ACTIONS
    ============================================================ */
 
-function render(){
-  const id = current();
-  DB.role = roleOf(id);
-  const fn = VIEWS[id] || VIEWS[ROLES[DB.role].home];
-  $("#view").innerHTML = fn();
-  renderNav();
-  const item = ROLES[DB.role].nav.find(n=>n.id===id);
-  document.title = "OMA — " + (item?.label || ROLES[DB.role].label);
-  $("#topavatar").textContent = DB.role==="athlete" ? initials()
-    : ROLES[DB.role].who.split(" ").map(w=>w[0]).join("");
-}
+const ACT = {
 
-/* ============================================================
-   6. ACTIONS
-   ============================================================ */
+  /* ---- gate ---- */
+  "gate-switch"(el){ gateMode = el.dataset.id; gateMsg = null; authScreen(); },
+  "gate-role"(el){ gateRole = el.dataset.id; authScreen(); },
 
-const ACTIONS = {
+  async "do-signin"(){
+    const email = $("#g-email").value.trim(), password = $("#g-pass").value;
+    if(!email || !password){ gateMsg={text:"Email and password required"}; return authScreen(); }
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if(error){ gateMsg={text:error.message}; return authScreen(); }
+    gateMsg = null; boot();
+  },
 
-  /* ---- nav ---- */
+  async "do-signup"(){
+    const email = $("#g-email").value.trim(), password = $("#g-pass").value;
+    const full_name = $("#g-name").value.trim();
+    if(!email || password.length < 6){ gateMsg={text:"Use a valid email and a password of at least 6 characters"}; return authScreen(); }
+    const { data, error } = await sb.auth.signUp({
+      email, password, options:{ data:{ full_name, role:gateRole } }
+    });
+    if(error){ gateMsg={text:error.message}; return authScreen(); }
+    if(!data.session){
+      gateMsg={ok:true, text:"Check your email to confirm your account, then sign in."};
+      gateMode = "signin"; return authScreen();
+    }
+    gateMsg = null; boot();
+  },
+
+  async "create-athlete"(){
+    const first_name = $("#o-first").value.trim(), last_name = $("#o-last").value.trim();
+    if(!first_name || !last_name){ toast("Add your name", true); return; }
+    const row = await q(sb.from("athletes").insert({
+      profile_id: state.profile.id, first_name, last_name,
+      sport: $("#o-sport").value.trim() || null,
+      school: $("#o-school").value.trim() || null,
+      roster_flag: "Needs profile update"
+    }).select().single(),"create athlete");
+    if(row) boot();
+  },
+
+  reload(){ boot(); },
+  async signout(){ await sb.auth.signOut(); location.reload(); },
+  account(){ ACT.more(); },
+
   more(){
-    const rest = ROLES[DB.role].nav.filter(n=>!n.tab);
-    openModal({
-      title:"More",
-      body:`<div class="sheet-list">
-        ${rest.map(n=>`<button data-go="${n.id}">${svg(n.icon,19)}${n.label}</button>`).join("")}
-        ${DB.role==="athlete"?`<button data-go="settings">${svg("settings",19)}Settings</button>`:""}
-        <button data-act="switch-role">${svg("user",19)}Switch portal</button>
-        <button data-act="logout">${svg("logout",19)}Log out</button>
-      </div>`
-    });
-  },
-
-  logout(){
-    openModal({
-      title:"Log out?",
-      body:`<p class="hint">You'll need your email and password to get back in.</p>`,
-      foot:`<button class="btn" data-close>Stay logged in</button>
-            <button class="btn btn-primary" data-act="logout-confirm">Log out</button>`
-    });
-  },
-  "logout-confirm"(){ closeModal(); toast("Logged out"); },
-
-  /* ---- dashboard ---- */
-  "toggle-task"(el){
-    const t = DB.tasks.find(x=>x.id===el.dataset.id);
-    t.done = !t.done;
-    render();
-    if(t.done) toast("Task complete");
-  },
-  "add-task"(){
-    openModal({
-      title:"Add a task",
-      body:`<div class="form-grid">
-        <div class="f"><label for="nt">What needs doing</label><input id="nt" placeholder="Post 1 reel for Lumen"></div>
-        <div class="f"><label for="nd">When</label><input id="nd" type="date"></div>
-      </div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="add-task-save">Add task</button>`
-    });
-  },
-  "add-task-save"(){
-    const label = $("#nt").value.trim();
-    if(!label){ toast("Give the task a name"); return; }
-    const d = $("#nd").value;
-    DB.tasks.unshift({id:"t"+Date.now(), label, due:d?"Due "+fmt(d):"No date", done:false});
-    closeModal(); render(); toast("Task added");
+    const nav = navFor(state.profile.role);
+    openModal({ title:"More", body:`<div class="sheet-list">
+      ${nav.filter(n=>!n.tab).map(n=>`<button data-go="${n.id}">${svg(n.icon,19)}${n.label}</button>`).join("")}
+      <button data-act="signout">Sign out</button></div>` });
   },
 
   /* ---- profile ---- */
   "edit-profile"(){
-    const a = DB.athlete;
-    openModal({
-      title:"Edit profile",
+    const a = state.athlete;
+    const fld = (id,label,val,type="text") =>
+      `<div class="f"><label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(val??"")}"></div>`;
+    openModal({ title:"Edit profile",
       body:`<div class="form-grid two">
-        <div class="f"><label for="p-first">First name</label><input id="p-first" value="${esc(a.first)}"></div>
-        <div class="f"><label for="p-last">Last name</label><input id="p-last" value="${esc(a.last)}"></div>
-        <div class="f"><label for="p-school">School</label><input id="p-school" value="${esc(a.school)}"></div>
-        <div class="f"><label for="p-pos">Position</label><input id="p-pos" value="${esc(a.position)}"></div>
-        <div class="f span"><label for="p-short">Short bio</label><textarea id="p-short" style="min-height:64px">${esc(a.bioShort)}</textarea></div>
-        <div class="f span"><label for="p-long">Long bio</label><textarea id="p-long">${esc(a.bioLong)}</textarea></div>
+        ${fld("p-first","First name",a.first_name)}${fld("p-last","Last name",a.last_name)}
+        ${fld("p-nick","Preferred name",a.nickname)}${fld("p-num","Jersey number",a.jersey_number)}
+        ${fld("p-school","School",a.school)}${fld("p-class","Class year",a.class_year)}
+        ${fld("p-sport","Sport",a.sport)}${fld("p-pos","Position",a.position)}
+        ${fld("p-height","Height",a.height)}${fld("p-weight","Weight",a.weight)}
+        ${fld("p-gpa","GPA",a.gpa,"number")}${fld("p-town","Hometown",a.hometown)}
+        ${fld("p-eng","Engagement rate",a.engagement_rate)}${fld("p-avail","Availability",a.availability)}
+        <div class="f span"><label for="p-aud">Audience</label><input id="p-aud" value="${esc(a.audience_note??"")}" placeholder="71% female · 62% aged 13–24"></div>
+        <div class="f span"><label for="p-short">Short bio</label><textarea id="p-short" style="min-height:60px">${esc(a.bio_short??"")}</textarea></div>
+        <div class="f span"><label for="p-long">Long bio</label><textarea id="p-long">${esc(a.bio_long??"")}</textarea></div>
       </div>`,
       foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="save-profile">Save changes</button>`
-    });
+            <button class="btn btn-primary" data-act="save-profile">Save</button>` });
   },
-  "save-profile"(){
-    const a = DB.athlete;
-    a.first = $("#p-first").value.trim() || a.first;
-    a.last  = $("#p-last").value.trim()  || a.last;
-    a.school= $("#p-school").value.trim()|| a.school;
-    a.position = $("#p-pos").value.trim()|| a.position;
-    a.bioShort = $("#p-short").value.trim();
-    a.bioLong  = $("#p-long").value.trim();
-    closeModal(); render(); toast("Profile saved");
+  async "save-profile"(){
+    const v = id => { const el = $("#"+id); return el && el.value.trim() !== "" ? el.value.trim() : null; };
+    const ok = await q(sb.from("athletes").update({
+      first_name:v("p-first")||state.athlete.first_name, last_name:v("p-last")||state.athlete.last_name,
+      nickname:v("p-nick"), jersey_number:v("p-num"), school:v("p-school"), class_year:v("p-class"),
+      sport:v("p-sport"), position:v("p-pos"), height:v("p-height"), weight:v("p-weight"),
+      gpa:v("p-gpa"), hometown:v("p-town"), engagement_rate:v("p-eng"), availability:v("p-avail"),
+      audience_note:v("p-aud"), bio_short:v("p-short"), bio_long:v("p-long")
+    }).eq("id",A()).select(),"save profile");
+    if(ok){ closeModal(); await refreshAthlete(); render(); toast("Profile saved"); }
   },
-  "preview-public"(){
-    const a = DB.athlete;
-    openModal({
-      title:"Your public page",
-      body:`<div class="kit clean" style="border-radius:12px">
-        <header class="kit-head">
-          <p class="kit-eyebrow">${esc(a.sport)} · ${esc(a.classYear)}</p>
-          <h2 class="kit-name">${esc(fullName())}</h2>
-          <p class="kit-sub">${esc(a.position)} at ${esc(a.school)}</p>
-        </header>
-        <div class="kit-body">
-          <div class="kit-sec"><p>${esc(a.bioLong)}</p></div>
-          <div class="kit-sec"><div class="kit-reach">
-            ${a.socials.map(s=>`<div><b>${compact(s.followers)}</b><span>${esc(s.net)}</span></div>`).join("")}
-          </div></div>
-        </div>
-      </div>
-      <p class="hint" style="margin-top:12px">GPA and contact details are hidden from this view. Change that under Privacy.</p>`,
-      foot:`<button class="btn btn-primary" data-close>Close preview</button>`
-    });
+
+  "add-achievement"(){
+    openModal({ title:"Add an achievement",
+      body:`<div class="f"><label for="ac">Achievement</label><input id="ac" placeholder="All-Region First Team, 2025–26"></div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-achievement">Add</button>` });
   },
-  privacy(){
-    const a = DB.athlete;
-    openModal({
-      title:"What the public sees",
-      body:`<p class="hint" style="margin-bottom:14px">Anything switched off still shows to your guardian and the OMA team.</p>
-      <div class="rows">
-        ${[["Name and sport",true,"locked"],["Bio and achievements",true,""],["Social handles and follower counts",true,""],["GPA and academic honors",a.gpaPublic,"gpa"],["Height and weight",true,""],["Contact details",false,""],["Hometown",true,""]]
-          .map(([l,on,key])=>`
-          <div class="row">
-            <span class="grow"><b>${esc(l)}</b>${key==="locked"?'<small>Always visible</small>':""}</span>
-            <button class="tick ${on?"done":""}" ${key==="locked"?"disabled style=opacity:.45":`data-act="toggle-privacy" data-key="${key}"`} aria-pressed="${on}" aria-label="Toggle">${svg("check",13)}</button>
-          </div>`).join("")}
-      </div>`,
-      foot:`<button class="btn btn-primary" data-close>Done</button>`
-    });
-  },
-  "toggle-privacy"(el){
-    if(el.dataset.key==="gpa"){
-      DB.athlete.gpaPublic = !DB.athlete.gpaPublic;
-      toast(DB.athlete.gpaPublic ? "GPA is now public" : "GPA is now hidden");
+  async "save-achievement"(){
+    const label = $("#ac").value.trim();
+    if(!label){ toast("Type something", true); return; }
+    if(await q(sb.from("achievements").insert({athlete_id:A(), label}).select(),"achievement")){
+      closeModal(); render(); toast("Added");
     }
-    el.classList.toggle("done");
-    el.setAttribute("aria-pressed", el.classList.contains("done"));
+  },
+  async "del-achievement"(el){
+    if(await q(sb.from("achievements").delete().eq("id",el.dataset.id).select(),"delete")){ render(); toast("Removed"); }
   },
 
-  /* ---- media kit ---- */
-  tpl(el){ DB.kitTemplate = el.dataset.id; render(); },
-  "generate-kit"(){
-    toast("Media kit generated from your profile");
+  "add-social"(){
+    openModal({ title:"Add a social account",
+      body:`<div class="form-grid two">
+        <div class="f"><label for="s-net">Platform</label>
+          <select id="s-net"><option>Instagram</option><option>TikTok</option><option>X</option><option>YouTube</option><option>Snapchat</option></select></div>
+        <div class="f"><label for="s-handle">Handle</label><input id="s-handle" placeholder="@yourname"></div>
+        <div class="f span"><label for="s-foll">Followers</label><input id="s-foll" type="number" min="0"></div>
+      </div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-social">Add</button>` });
   },
-  "preview-kit"(){
-    const k = $("#kit");
-    if(k) k.scrollIntoView({behavior:"smooth", block:"start"});
+  async "save-social"(){
+    if(await q(sb.from("socials").insert({
+      athlete_id:A(), network:$("#s-net").value,
+      handle:$("#s-handle").value.trim()||null,
+      followers:Number($("#s-foll").value||0)
+    }).select(),"social")){ closeModal(); render(); toast("Added"); }
   },
-  "download-kit"(){
-    toast("Opening print view — save as PDF");
-    setTimeout(()=>window.print(), 500);
-  },
-  "share-kit"(){
-    openModal({
-      title:"Share your media kit",
-      body:`<div class="f"><label for="lnk">Anyone with this link can view it</label>
-        <input id="lnk" readonly value="oma.app/k/jayda-whitmore"></div>
-      <p class="hint" style="margin-top:12px">You'll get a notification each time it's opened.</p>`,
-      foot:`<button class="btn" data-close>Close</button>
-            <button class="btn btn-primary" data-act="copy-link">Copy link</button>`
-    });
-  },
-  "copy-link"(){
-    const i = $("#lnk"); i.select();
-    try{ document.execCommand("copy"); }catch(e){}
-    closeModal(); toast("Link copied");
+  async "del-social"(el){
+    if(await q(sb.from("socials").delete().eq("id",el.dataset.id).select(),"delete")){ render(); toast("Removed"); }
   },
 
-  /* ---- gallery ---- */
-  folder(el){ DB.activeFolder = el.dataset.id; render(); },
-  upload(){
-    openModal({
-      title:"Upload media",
-      body:`<div class="form-grid">
-        <div class="f"><label for="u-name">File</label><input id="u-name" type="file" multiple></div>
-        <div class="f"><label for="u-folder">Album</label>
-          <select id="u-folder">${DB.folders.filter(f=>f!=="All").map(f=>`<option>${esc(f)}</option>`).join("")}</select></div>
-        <div class="f"><label for="u-tag">Tag to a sponsor or campaign</label>
-          <select id="u-tag"><option>No sponsor</option>${DB.brands.map(b=>`<option>${esc(b.name)}</option>`).join("")}</select></div>
-        <div class="f"><label for="u-flag">Status</label>
-          <select id="u-flag"><option>Draft</option><option>Approved</option><option>Posted</option></select></div>
-      </div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="upload-save">Upload</button>`
-    });
+  /* ---- tasks ---- */
+  "add-task"(){
+    openModal({ title:"Add a task",
+      body:`<div class="form-grid"><div class="f"><label for="t-label">What needs doing</label><input id="t-label"></div>
+        <div class="f"><label for="t-due">When</label><input id="t-due" type="date"></div></div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-task">Add</button>` });
   },
-  "upload-save"(){
-    const files = $("#u-name").files;
-    const folder = $("#u-folder").value;
-    const flag = $("#u-flag").value;
-    const cls = ["a","b","c","d"][DB.gallery.length % 4];
-    const name = files && files.length ? files[0].name.replace(/\.[^.]+$/,"") : "New upload";
-    DB.gallery.unshift({id:"g"+Date.now(), name, folder, date:"Sep 2026", fav:false, flag, cls});
-    DB.activeFolder = folder;
-    closeModal(); render();
-    toast(files && files.length>1 ? files.length+" files uploaded" : "Uploaded");
+  async "save-task"(){
+    const label = $("#t-label").value.trim();
+    if(!label){ toast("Give it a name", true); return; }
+    if(await q(sb.from("tasks").insert({athlete_id:A(), label, due_on:$("#t-due").value||null}).select(),"task")){
+      closeModal(); render(); toast("Task added");
+    }
   },
-  "new-folder"(){
-    openModal({
-      title:"Create an album",
-      body:`<div class="f"><label for="nf">Album name</label><input id="nf" placeholder="State tournament"></div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="new-folder-save">Create</button>`
-    });
-  },
-  "new-folder-save"(){
-    const v = $("#nf").value.trim();
-    if(!v){ toast("Give the album a name"); return; }
-    DB.folders.push(v); DB.activeFolder = v;
-    closeModal(); render(); toast("Album created");
-  },
-  fav(el){
-    const g = DB.gallery.find(x=>x.id===el.dataset.id);
-    g.fav = !g.fav; render();
-    toast(g.fav ? "Added to favourites" : "Removed from favourites");
-  },
-  "to-kit"(el){
-    const g = DB.gallery.find(x=>x.id===el.dataset.id);
-    toast(`"${g.name}" added to your media kit`);
-  },
-  "download-media"(){ toast("Download started"); },
-
-  /* ---- outreach ---- */
-  "new-email"(){
-    openModal({
-      title:"Draft a new email",
-      body:`<div class="form-grid">
-        <div class="f"><label for="e-brand">Brand</label>
-          <select id="e-brand">${DB.brands.map(b=>`<option>${esc(b.name)}</option>`).join("")}</select></div>
-        <div class="f"><label for="e-tpl">Template</label>
-          <select id="e-tpl">${DB.templates.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("")}</select></div>
-        <div class="f"><button class="btn btn-gold" data-act="ai-draft" style="width:100%">${svg("spark",16)}Write it for me</button>
-          <p class="hint" style="margin-top:7px">Pulls your stats, audience, and brand fit from your profile.</p></div>
-        <div class="f"><label for="e-body">Email</label><textarea id="e-body" style="min-height:190px" placeholder="Write your pitch, or let OMA draft it."></textarea></div>
-      </div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="send-email">${svg("send",15)}Send</button>`
-    });
-  },
-  "ai-draft"(){
-    const brand = $("#e-brand").value;
-    const tpl = $("#e-tpl").value;
-    const box = $("#e-body");
-    box.value = "Writing…";
-    setTimeout(()=>{ box.value = draftEmail(brand, tpl); toast("Draft ready — edit before sending"); }, 550);
-  },
-  "send-email"(){
-    const brand = $("#e-brand").value;
-    if(!$("#e-body").value.trim()){ toast("The email is empty"); return; }
-    const b = DB.brands.find(x=>x.name===brand);
-    if(b && b.status==="Not contacted") b.status = "In progress";
-    DB.outreach.unshift({
-      id:"o"+Date.now(), brand,
-      contact:"—", sent:new Date().toISOString().slice(0,10),
-      status:"Sent", next:"—", notes:""
-    });
-    closeModal(); go("outreach"); render(); toast("Email sent to "+brand);
-  },
-  "use-template"(el){
-    const t = DB.templates.find(x=>x.id===el.dataset.id);
-    ACTIONS["new-email"]();
-    setTimeout(()=>{ $("#e-tpl").value = t.id; }, 80);
-  },
-  "log-outreach"(){
-    openModal({
-      title:"Log outreach",
-      body:`<p class="hint" style="margin-bottom:14px">For emails or DMs you sent outside the app.</p>
-      <div class="form-grid two">
-        <div class="f"><label for="l-brand">Brand</label><input id="l-brand" placeholder="Halo Hydration"></div>
-        <div class="f"><label for="l-contact">Contact</label><input id="l-contact" placeholder="Name, role"></div>
-        <div class="f"><label for="l-date">Date sent</label><input id="l-date" type="date"></div>
-        <div class="f"><label for="l-status">Status</label>
-          <select id="l-status"><option>Sent</option><option>Opened</option><option>Replied</option><option>Declined</option><option>Deal closed</option></select></div>
-        <div class="f span"><label for="l-notes">Notes</label><textarea id="l-notes" style="min-height:70px"></textarea></div>
-      </div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="log-outreach-save">Log it</button>`
-    });
-  },
-  "log-outreach-save"(){
-    const brand = $("#l-brand").value.trim();
-    if(!brand){ toast("Which brand?"); return; }
-    DB.outreach.unshift({
-      id:"o"+Date.now(), brand,
-      contact:$("#l-contact").value.trim()||"—",
-      sent:$("#l-date").value||new Date().toISOString().slice(0,10),
-      status:$("#l-status").value, next:"—", notes:$("#l-notes").value.trim()
-    });
-    closeModal(); render(); toast("Outreach logged");
-  },
-  "set-status"(el){
-    const r = DB.outreach.find(x=>x.id===el.dataset.id);
-    openModal({
-      title:r.brand,
-      body:`<div class="f"><label for="st">Status</label>
-        <select id="st">${["Sent","Opened","Replied","Declined","Deal closed"].map(s=>`<option ${s===r.status?"selected":""}>${s}</option>`).join("")}</select></div>
-        <div class="f" style="margin-top:13px"><label for="nt2">Notes</label><textarea id="nt2" style="min-height:80px">${esc(r.notes)}</textarea></div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="set-status-save" data-id="${r.id}">Save</button>`
-    });
-  },
-  "set-status-save"(el){
-    const r = DB.outreach.find(x=>x.id===el.dataset.id);
-    r.status = $("#st").value;
-    r.notes = $("#nt2").value.trim();
-    closeModal(); render(); toast(r.brand+" marked "+r.status.toLowerCase());
-  },
-  "set-reminder"(el){
-    const r = DB.outreach.find(x=>x.id===el.dataset.id);
-    openModal({
-      title:"Follow up with "+r.brand,
-      body:`<div class="f"><label for="rd">Remind me on</label><input id="rd" type="date" value="${r.next!=="—"?r.next:""}"></div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="set-reminder-save" data-id="${r.id}">Set reminder</button>`
-    });
-  },
-  "set-reminder-save"(el){
-    const r = DB.outreach.find(x=>x.id===el.dataset.id);
-    const v = $("#rd").value;
-    if(!v){ toast("Pick a date"); return; }
-    r.next = v;
-    closeModal(); render(); toast("Reminder set for "+fmt(v));
+  async "toggle-task"(el){
+    const done = el.dataset.done !== "true";
+    if(await q(sb.from("tasks").update({done}).eq("id",el.dataset.id).select(),"task")) render();
   },
 
   /* ---- deals ---- */
   "add-deal"(){
-    openModal({
-      title:"Add a deal",
+    openModal({ title:"Add a deal",
       body:`<div class="form-grid two">
-        <div class="f"><label for="d-brand">Brand</label><input id="d-brand" placeholder="Lumen Athletic"></div>
+        <div class="f"><label for="d-brand">Brand</label><input id="d-brand"></div>
         <div class="f"><label for="d-type">Deal type</label>
           <select id="d-type"><option>Social post</option><option>Social post bundle</option><option>Appearance</option><option>Ambassador</option><option>Product seeding</option></select></div>
-        <div class="f"><label for="d-value">Value (USD)</label><input id="d-value" type="number" min="0" placeholder="1500"></div>
+        <div class="f"><label for="d-value">Value (dollars)</label><input id="d-value" type="number" min="0" step="0.01"></div>
         <div class="f"><label for="d-status">Status</label>
           <select id="d-status"><option>Pending</option><option>Signed</option><option>Active</option><option>Completed</option><option>Paid</option></select></div>
-        <div class="f span"><label for="d-deliv">Deliverables, one per line</label>
-          <textarea id="d-deliv" placeholder="2 IG stories by Nov 8&#10;1 in-feed reel"></textarea></div>
-      </div>
-      <p class="hint" style="margin-top:12px">Pending deals go to your guardian for approval before they activate.</p>`,
+        <div class="f span"><label for="d-terms">Terms</label><textarea id="d-terms" style="min-height:70px" placeholder="Two hours in-store. Travel covered. No exclusivity."></textarea></div>
+        <div class="f span"><label for="d-deliv">Deliverables, one per line</label><textarea id="d-deliv"></textarea></div>
+      </div><p class="hint" style="margin-top:12px">This goes to your guardian for approval before it activates.</p>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-deal">Add deal</button>` });
+  },
+  async "save-deal"(){
+    const brand_name = $("#d-brand").value.trim();
+    if(!brand_name){ toast("Which brand?", true); return; }
+    const deal = await q(sb.from("deals").insert({
+      athlete_id:A(), brand_name, deal_type:$("#d-type").value,
+      value_cents: Math.round(Number($("#d-value").value||0)*100),
+      status:$("#d-status").value, approval:"Awaiting approval",
+      terms:$("#d-terms").value.trim()||null
+    }).select().single(),"deal");
+    if(!deal) return;
+    const lines = $("#d-deliv").value.split("\n").map(s=>s.trim()).filter(Boolean);
+    if(lines.length){
+      await q(sb.from("deliverables").insert(lines.map(label=>({deal_id:deal.id,label}))).select(),"deliverables");
+    }
+    closeModal(); render(); toast("Deal added — sent for approval");
+  },
+  "add-deliverable"(el){
+    openModal({ title:"Add a deliverable",
+      body:`<div class="f"><label for="dl">What's promised</label><input id="dl" placeholder="2 IG stories by Nov 8"></div>`,
       foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="add-deal-save">Add deal</button>`
-    });
+            <button class="btn btn-primary" data-act="save-deliverable" data-id="${el.dataset.id}">Add</button>` });
   },
-  "add-deal-save"(){
-    const brand = $("#d-brand").value.trim();
-    if(!brand){ toast("Which brand?"); return; }
-    const deliv = $("#d-deliv").value.split("\n").map(s=>s.trim()).filter(Boolean).map(t=>({t,done:false}));
-    DB.deals.unshift({
-      id:"d"+Date.now(), brand,
-      type:$("#d-type").value,
-      value:Number($("#d-value").value||0),
-      status:$("#d-status").value,
-      paid:"—",
-      deliverables:deliv.length?deliv:[{t:"Terms to be confirmed",done:false}],
-      contract:null
-    });
-    closeModal(); render(); toast("Deal added — sent to your guardian for approval");
+  async "save-deliverable"(el){
+    const label = $("#dl").value.trim();
+    if(!label){ toast("Type something", true); return; }
+    if(await q(sb.from("deliverables").insert({deal_id:el.dataset.id, label}).select(),"deliverable")){
+      closeModal(); render(); toast("Added");
+    }
   },
-  "toggle-deliverable"(el){
-    const d = DB.deals.find(x=>x.id===el.dataset.id);
-    const item = d.deliverables[Number(el.dataset.i)];
-    item.done = !item.done;
-    render();
-    if(item.done) toast("Deliverable marked complete");
-  },
-  "upload-contract"(el){
-    const id = el.dataset.id;
-    openModal({
-      title:"Upload contract",
-      body:`<div class="f"><label for="c-file">Contract file (PDF)</label><input id="c-file" type="file" accept=".pdf"></div>
-      <p class="hint" style="margin-top:12px">Your guardian and the OMA team can see anything you upload here.</p>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="upload-contract-save" data-id="${id}">Upload</button>`
-    });
-  },
-  "upload-contract-save"(el){
-    const d = DB.deals.find(x=>x.id===el.dataset.id);
-    const f = $("#c-file").files;
-    d.contract = f && f.length ? f[0].name : "contract.pdf";
-    closeModal(); render(); toast("Contract uploaded");
-  },
-  "view-contract"(el){
-    const d = DB.deals.find(x=>x.id===el.dataset.id);
-    toast("Opening "+d.contract);
-  },
-  "log-payment"(el){
-    const d = el.dataset.id ? DB.deals.find(x=>x.id===el.dataset.id) : null;
-    openModal({
-      title:"Log a payment",
-      body:`<div class="form-grid two">
-        <div class="f"><label for="pay-src">From</label><input id="pay-src" value="${d?esc(d.brand):""}" placeholder="Brand name"></div>
-        <div class="f"><label for="pay-amt">Amount (USD)</label><input id="pay-amt" type="number" min="0" value="${d?d.value:""}"></div>
-        <div class="f span"><label for="pay-date">Date received</label><input id="pay-date" type="date"></div>
-      </div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="log-payment-save" data-id="${d?d.id:""}">Log payment</button>`
-    });
-  },
-  "log-payment-save"(el){
-    const src = $("#pay-src").value.trim();
-    const amt = Number($("#pay-amt").value||0);
-    if(!src || !amt){ toast("Add a source and an amount"); return; }
-    const dt = $("#pay-date").value;
-    DB.payments.unshift({src, amt, date: dt ? new Date(dt+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) : "Today"});
-    const d = DB.deals.find(x=>x.id===el.dataset.id);
-    if(d){ d.status = "Paid"; d.paid = dt || "today"; }
-    closeModal(); render(); toast("Payment logged");
-  },
-  "earnings-report"(){
-    const total = DB.payments.reduce((s,p)=>s+p.amt,0);
-    openModal({
-      title:"Earnings report",
-      body:`<div class="strip" style="margin-bottom:16px">
-        <div><b>${money(total)}</b><span>Received</span></div>
-        <div><b>${DB.payments.length}</b><span>Payments</span></div>
-        <div><b>${money(Math.round(total/DB.payments.length))}</b><span>Average</span></div>
-      </div>
-      <div class="rows">${DB.payments.map(p=>`
-        <div class="row"><span class="grow"><b>${esc(p.src)}</b><small>${esc(p.date)}</small></span><b>${money(p.amt)}</b></div>`).join("")}</div>
-      <p class="hint" style="margin-top:12px">Your guardian can export this for tax season.</p>`,
-      foot:`<button class="btn" data-close>Close</button>
-            <button class="btn btn-primary" data-act="export-report">Export CSV</button>`
-    });
-  },
-  "export-report"(){
-    const rows = [["Source","Amount","Date"], ...DB.payments.map(p=>[p.src,p.amt,p.date])];
-    const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-    const a = document.createElement("a");
-    a.href = url; a.download = "oma-earnings.csv"; a.click();
-    URL.revokeObjectURL(url);
-    closeModal(); toast("Report exported");
+  async "toggle-deliverable"(el){
+    const done = el.dataset.v !== "true";
+    if(await q(sb.from("deliverables").update({done}).eq("id",el.dataset.id).select(),"deliverable")) render();
   },
 
-  /* ---- brands ---- */
-  "request-intro"(el){
-    const name = el.dataset.id;
-    openModal({
-      title:"Request an introduction",
-      body:`<p class="hint" style="margin-bottom:14px">Your agent will pitch you to ${esc(name)} directly. Tell her why you're a fit.</p>
-      <div class="f"><label for="ri">Why you</label><textarea id="ri" placeholder="Their audience is my audience — 71% female, mostly 13–24."></textarea></div>`,
+  /* ---- approvals ---- */
+  "approve"(el){
+    openModal({ title:"Approve this deal?",
+      body:`<p class="hint">Approving lets the athlete sign and start the deliverables.</p>`,
+      foot:`<button class="btn" data-close>Not yet</button>
+            <button class="btn btn-primary" data-act="approve-yes" data-id="${el.dataset.id}">Approve</button>` });
+  },
+  async "approve-yes"(el){
+    if(await q(sb.from("deals").update({
+      approval:"Approved", status:"Signed",
+      approved_by: state.profile.id, approved_at: new Date().toISOString()
+    }).eq("id",el.dataset.id).select(),"approve")){ closeModal(); render(); toast("Deal approved"); }
+  },
+  "decline"(el){
+    openModal({ title:"Request changes",
+      body:`<div class="f"><label for="dc">What needs to change</label><textarea id="dc"></textarea></div>`,
       foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="request-intro-send" data-id="${esc(name)}">Send request</button>`
-    });
+            <button class="btn btn-primary" data-act="decline-yes" data-id="${el.dataset.id}">Send</button>` });
   },
-  "request-intro-send"(el){
-    const b = DB.brands.find(x=>x.name===el.dataset.id);
-    if(b && b.status==="Not contacted") b.status = "In progress";
-    closeModal(); render(); toast("Request sent to Tasha");
+  async "decline-yes"(el){
+    const note = $("#dc").value.trim();
+    if(await q(sb.from("deals").update({approval:"Changes requested", terms:note||null}).eq("id",el.dataset.id).select(),"decline")){
+      closeModal(); render(); toast("Sent back for changes");
+    }
   },
-  "brand-profile"(el){
-    const b = DB.brands.find(x=>x.name===el.dataset.id);
-    const history = DB.outreach.filter(o=>o.brand===b.name);
-    openModal({
-      title:b.name,
-      body:`<div class="record-top" style="margin-bottom:14px">
-        <span class="brandmark ${b.cls}">${esc(b.mark)}</span>
-        <span class="grow"><b>${esc(b.cat)}</b><small>${esc(b.status)}</small></span>
+
+  /* ---- payments ---- */
+  "log-payment"(el){
+    openModal({ title:"Log a payment",
+      body:`<div class="form-grid two">
+        <div class="f"><label for="py-src">From</label><input id="py-src" value="${esc(el.dataset.brand||"")}"></div>
+        <div class="f"><label for="py-amt">Amount (dollars)</label><input id="py-amt" type="number" step="0.01" value="${el.dataset.amt?(Number(el.dataset.amt)/100):""}"></div>
+        <div class="f span"><label for="py-date">Date received</label><input id="py-date" type="date"></div>
+      </div>${state.profile.role!=="admin"?`<p class="hint" style="margin-top:12px">Only OMA staff can record payments. Ask your agent to log this.</p>`:""}`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="save-payment" data-id="${el.dataset.id||""}">Log payment</button>` });
+  },
+  async "save-payment"(el){
+    const source = $("#py-src").value.trim();
+    const amount_cents = Math.round(Number($("#py-amt").value||0)*100);
+    if(!source || !amount_cents){ toast("Add a source and amount", true); return; }
+    const row = await q(sb.from("payments").insert({
+      athlete_id:A(), deal_id:el.dataset.id||null, source, amount_cents,
+      received_on: $("#py-date").value || new Date().toISOString().slice(0,10)
+    }).select(),"payment");
+    if(!row) return;
+    if(el.dataset.id) await sb.from("deals").update({status:"Paid"}).eq("id",el.dataset.id);
+    closeModal(); render(); toast("Payment logged");
+  },
+
+  /* ---- outreach ---- */
+  async "new-outreach"(){
+    const [socials, brands] = await Promise.all([load.socials(), load.brands()]);
+    const a = state.athlete;
+    const reach = (socials||[]).reduce((s,x)=>s+(x.followers||0),0);
+    const draft = `Hi there,
+
+I'm ${a.first_name} ${a.last_name}, a ${a.position||"student athlete"} at ${a.school||"my school"}${a.hometown?" in "+a.hometown:""}.
+
+Where I stand: ${compact(reach)} followers across ${(socials||[]).length||"my"} platforms${a.engagement_rate?", "+a.engagement_rate+" engagement":""}${a.audience_note?", and an audience that's "+a.audience_note.toLowerCase():""}.
+
+${a.bio_short||""}
+
+I've attached my media kit. Happy to talk about what a partnership could look like.
+
+Thanks for the time,
+${a.first_name}`;
+    openModal({ title:"Draft an email",
+      body:`<div class="form-grid">
+        <div class="f"><label for="o-brand">Brand</label>
+          <input id="o-brand" list="brandlist" placeholder="Brand name">
+          <datalist id="brandlist">${(brands||[]).map(b=>`<option>${esc(b.name)}</option>`).join("")}</datalist></div>
+        <div class="f"><label for="o-contact">Contact</label><input id="o-contact" placeholder="Name, role"></div>
+        <div class="f"><label for="o-body">Email</label><textarea id="o-body" style="min-height:220px">${esc(draft)}</textarea></div>
       </div>
-      <p style="margin-bottom:16px">${esc(b.looks)}</p>
-      <h4 style="font-size:14px;margin-bottom:9px">Your history</h4>
-      ${history.length ? `<div class="rows">${history.map(h=>`
-        <div class="row"><span class="grow"><b>${esc(fmt(h.sent))}</b><small>${esc(h.contact)}</small></span>
-        <span class="chip ${statusClass(h.status)}">${esc(h.status)}</span></div>`).join("")}</div>`
-        : `<p class="hint">No contact yet.</p>`}`,
-      foot:`<button class="btn" data-close>Close</button>
-            <button class="btn btn-primary" data-act="request-intro" data-id="${esc(b.name)}">Request an introduction</button>`
-    });
+      <p class="hint" style="margin-top:10px">Written from your profile. Edit before sending — copy it into your email client for now.</p>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="save-outreach">Log as sent</button>` });
+  },
+  async "save-outreach"(){
+    const brand_name = $("#o-brand").value.trim();
+    if(!brand_name){ toast("Which brand?", true); return; }
+    if(await q(sb.from("outreach").insert({
+      athlete_id:A(), brand_name, contact:$("#o-contact").value.trim()||null,
+      status:"Sent", sent_on:new Date().toISOString().slice(0,10),
+      created_by: state.profile.id
+    }).select(),"outreach")){ closeModal(); go("outreach"); toast("Logged"); }
+  },
+  "log-outreach"(){
+    openModal({ title:"Log outreach",
+      body:`<div class="form-grid two">
+        <div class="f"><label for="lo-brand">Brand</label><input id="lo-brand"></div>
+        <div class="f"><label for="lo-contact">Contact</label><input id="lo-contact"></div>
+        <div class="f"><label for="lo-date">Date sent</label><input id="lo-date" type="date"></div>
+        <div class="f"><label for="lo-status">Status</label>
+          <select id="lo-status"><option>Sent</option><option>Opened</option><option>Replied</option><option>Declined</option><option>Deal closed</option></select></div>
+        <div class="f span"><label for="lo-notes">Notes</label><textarea id="lo-notes" style="min-height:70px"></textarea></div>
+      </div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-log">Log it</button>` });
+  },
+  async "save-log"(){
+    const brand_name = $("#lo-brand").value.trim();
+    if(!brand_name){ toast("Which brand?", true); return; }
+    if(await q(sb.from("outreach").insert({
+      athlete_id:A(), brand_name, contact:$("#lo-contact").value.trim()||null,
+      sent_on:$("#lo-date").value||new Date().toISOString().slice(0,10),
+      status:$("#lo-status").value, notes:$("#lo-notes").value.trim()||null,
+      created_by: state.profile.id
+    }).select(),"outreach")){ closeModal(); render(); toast("Logged"); }
+  },
+  async "edit-outreach"(el){
+    const r = (await load.outreach()||[]).find(x=>x.id===el.dataset.id);
+    if(!r) return;
+    openModal({ title:r.brand_name,
+      body:`<div class="f"><label for="eo-status">Status</label>
+        <select id="eo-status">${["Sent","Opened","Replied","Declined","Deal closed"].map(s=>`<option ${s===r.status?"selected":""}>${s}</option>`).join("")}</select></div>
+        <div class="f" style="margin-top:12px"><label for="eo-follow">Follow up on</label><input id="eo-follow" type="date" value="${r.follow_up_on||""}"></div>
+        <div class="f" style="margin-top:12px"><label for="eo-notes">Notes</label><textarea id="eo-notes" style="min-height:80px">${esc(r.notes||"")}</textarea></div>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="save-edit-outreach" data-id="${r.id}">Save</button>` });
+  },
+  async "save-edit-outreach"(el){
+    if(await q(sb.from("outreach").update({
+      status:$("#eo-status").value,
+      follow_up_on:$("#eo-follow").value||null,
+      notes:$("#eo-notes").value.trim()||null
+    }).eq("id",el.dataset.id).select(),"outreach")){ closeModal(); render(); toast("Updated"); }
+  },
+
+  /* ---- media ---- */
+  upload(){
+    openModal({ title:"Upload media",
+      body:`<div class="form-grid">
+        <div class="f"><label for="m-file">Files</label><input id="m-file" type="file" multiple accept="image/*,video/*"></div>
+        <div class="f"><label for="m-folder">Album</label>
+          <select id="m-folder"><option>Headshots</option><option>Action shots</option><option>Sponsor content</option><option>Behind the scenes</option><option>Game day</option><option>Social posts</option></select></div>
+        <div class="f"><label for="m-flag">Status</label>
+          <select id="m-flag"><option>Draft</option><option>Approved</option><option>Posted</option></select></div>
+      </div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="do-upload">Upload</button>` });
+  },
+  async "do-upload"(el){
+    const files = $("#m-file").files;
+    if(!files.length){ toast("Pick a file", true); return; }
+    el.classList.add("saving"); el.textContent = "Uploading…";
+    const folder = $("#m-folder").value, flag = $("#m-flag").value;
+    let ok = 0;
+    for(const file of files){
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const path = `${A()}/${Date.now()}-${safe}`;
+      const { error } = await sb.storage.from("media").upload(path, file);
+      if(error){ toast(error.message.slice(0,80), true); continue; }
+      const row = await q(sb.from("media").insert({
+        athlete_id:A(), storage_path:path, name:file.name.replace(/\.[^.]+$/,""), folder, flag
+      }).select(),"media row");
+      if(row) ok++;
+    }
+    closeModal(); render();
+    toast(ok ? `${ok} file${ok>1?"s":""} uploaded` : "Upload failed", !ok);
+  },
+  async fav(el){
+    const favorite = el.dataset.v !== "true";
+    if(await q(sb.from("media").update({favorite}).eq("id",el.dataset.id).select(),"media")) render();
+  },
+  async "del-media"(el){
+    await sb.storage.from("media").remove([el.dataset.path]);
+    if(await q(sb.from("media").delete().eq("id",el.dataset.id).select(),"media")){ render(); toast("Deleted"); }
   },
 
   /* ---- messages ---- */
-  "send-msg"(){
-    const box = $("#msg");
-    const v = box.value.trim();
-    if(!v) return;
-    const now = new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
-    DB.messages.push({from:"me", text:v, at:now});
-    render();
-    const th = $("#thread"); if(th) th.scrollTop = th.scrollHeight;
-    $("#msg").focus();
+  async "send-msg"(el){
+    const box = $("#msg"); const body = box.value.trim();
+    if(!body) return;
+    if(await q(sb.from("messages").insert({
+      athlete_id:A(), sender_id:state.profile.id, audience:el.dataset.lane, body
+    }).select(),"message")){ box.value=""; render(); }
   },
 
-  /* ---- role switching ---- */
-  "switch-role"(){
-    openModal({
-      title:"Switch portal",
-      body:`<p class="hint" style="margin-bottom:14px">Three logins, three sets of tools. In the real build these are separate accounts — this switcher is here so you can walk through all three.</p>
-      <div class="sheet-list">
-        ${Object.entries(ROLES).map(([k,r])=>`
-          <button data-act="set-role" data-id="${k}">
-            <span class="brandmark ${k==="admin"?"g":k==="parent"?"i":""}" style="width:34px;height:34px;font-size:13px">${esc(r.who.split(" ").map(w=>w[0]).join(""))}</span>
-            <span><b style="display:block">${esc(r.label)}</b><small class="hint">${esc(r.who)}</small></span>
-          </button>`).join("")}
-      </div>`
-    });
+  /* ---- guardians ---- */
+  "link-guardian"(){
+    openModal({ title:"Link a guardian",
+      body:`<p class="hint" style="margin-bottom:14px">They need to have signed up as a parent first. Enter the email they used.</p>
+        <div class="f"><label for="lg-email">Guardian's email</label><input id="lg-email" type="email"></div>
+        <div class="f" style="margin-top:12px"><label for="lg-rel">Relationship</label><input id="lg-rel" placeholder="Mother"></div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="do-link">Link</button>` });
   },
-  "set-role"(el){
-    closeModal();
-    go(ROLES[el.dataset.id].home);
-    toast("Now viewing as "+ROLES[el.dataset.id].label.toLowerCase());
+  async "do-link"(){
+    const email = $("#lg-email").value.trim();
+    if(!email){ toast("Enter an email", true); return; }
+    const id = await q(sb.rpc("find_guardian",{p_email:email}),"find guardian");
+    if(!id){ toast("No parent account with that email", true); return; }
+    if(await q(sb.from("guardian_links").insert({
+      guardian_id:id, athlete_id:A(), relationship:$("#lg-rel").value.trim()||null
+    }).select(),"link")){ closeModal(); render(); toast("Guardian linked"); }
   },
-
-  /* ---- parent ---- */
-  "approve-deal"(el){
-    const d = DB.deals.find(x=>x.id===el.dataset.id);
-    openModal({
-      title:"Approve this deal?",
-      body:`<p style="margin-bottom:12px"><b>${esc(d.brand)}</b> — ${esc(d.type)}, ${money(d.value)}.</p>
-      ${d.terms?`<p class="hint" style="margin-bottom:14px">${esc(d.terms)}</p>`:""}
-      <p class="hint">Approving lets Jayda sign and start the deliverables. OMA keeps a copy of the agreement on file.</p>`,
-      foot:`<button class="btn" data-close>Not yet</button>
-            <button class="btn btn-primary" data-act="approve-confirm" data-id="${d.id}">Approve deal</button>`
-    });
+  async "unlink-guardian"(el){
+    if(await q(sb.from("guardian_links").delete().eq("guardian_id",el.dataset.id).eq("athlete_id",A()).select(),"unlink")){
+      render(); toast("Removed");
+    }
   },
-  "approve-confirm"(el){
-    const d = DB.deals.find(x=>x.id===el.dataset.id);
-    d.approval = "Approved";
-    d.status = "Signed";
-    closeModal(); render(); toast(d.brand+" approved");
-  },
-  "request-changes"(el){
-    const d = DB.deals.find(x=>x.id===el.dataset.id);
-    openModal({
-      title:"Request changes",
-      body:`<p class="hint" style="margin-bottom:14px">This goes to Tasha, not the brand. Jayda sees that changes were requested but not the detail.</p>
-      <div class="f"><label for="rc">What needs to change</label><textarea id="rc" placeholder="The date clashes with the state tournament."></textarea></div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="request-changes-send" data-id="${d.id}">Send to Tasha</button>`
-    });
-  },
-  "request-changes-send"(){ closeModal(); toast("Sent to Tasha"); },
 
   /* ---- admin ---- */
-  "open-athlete"(el){ DB.openAthlete = el.dataset.id; go("a-athlete"); },
-  "save-note"(el){
-    const r = DB.roster.find(x=>x.id===el.dataset.id);
-    r.note = $("#a-note").value.trim();
-    toast("Note saved");
+  async "open-athlete"(el){
+    state.athleteId = el.dataset.id;
+    state.athlete = state.roster.find(r=>r.id===el.dataset.id);
+    go("athlete");
   },
-  "set-flag"(el){
-    const r = DB.roster.find(x=>x.id===el.dataset.id);
-    openModal({
-      title:"Status for "+r.name,
-      body:`<div class="f"><label for="fl">Status</label>
-        <select id="fl">${["Active","In negotiation","Needs profile update","Paused"].map(s=>`<option ${s===r.flag?"selected":""}>${s}</option>`).join("")}</select></div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="set-flag-save" data-id="${r.id}">Save</button>`
-    });
+  async "save-note"(){
+    if(await q(sb.from("athletes").update({internal_note:$("#a-note").value.trim()||null}).eq("id",A()).select(),"note"))
+      toast("Note saved");
   },
-  "set-flag-save"(el){
-    const r = DB.roster.find(x=>x.id===el.dataset.id);
-    r.flag = $("#fl").value;
-    closeModal(); render(); toast(r.name+" marked "+r.flag.toLowerCase());
+  "set-flag"(){
+    openModal({ title:"Athlete status",
+      body:`<div class="f"><label for="fl">Status</label><select id="fl">
+        ${["Active","In negotiation","Needs profile update","Paused"].map(s=>`<option ${s===state.athlete.roster_flag?"selected":""}>${s}</option>`).join("")}</select></div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-flag">Save</button>` });
+  },
+  async "save-flag"(){
+    if(await q(sb.from("athletes").update({roster_flag:$("#fl").value}).eq("id",A()).select(),"flag")){
+      closeModal(); render(); toast("Status updated");
+    }
   },
   "add-athlete"(){
-    openModal({
-      title:"Add an athlete",
+    openModal({ title:"Add an athlete",
       body:`<div class="form-grid two">
-        <div class="f"><label for="na-name">Full name</label><input id="na-name" placeholder="Jordan Reyes"></div>
-        <div class="f"><label for="na-sport">Sport</label><input id="na-sport" placeholder="Soccer"></div>
-        <div class="f"><label for="na-school">School</label><input id="na-school" placeholder="Northside High"></div>
-        <div class="f"><label for="na-grade">Class</label>
-          <select id="na-grade"><option>Freshman</option><option>Sophomore</option><option>Junior</option><option>Senior</option></select></div>
-        <div class="f span"><label for="na-guardian">Guardian email</label><input id="na-guardian" type="email" placeholder="parent@email.com"></div>
+        <div class="f"><label for="na-first">First name</label><input id="na-first"></div>
+        <div class="f"><label for="na-last">Last name</label><input id="na-last"></div>
+        <div class="f"><label for="na-sport">Sport</label><input id="na-sport"></div>
+        <div class="f"><label for="na-school">School</label><input id="na-school"></div>
       </div>
-      <p class="hint" style="margin-top:12px">They'll get an invite to set a password. Guardians under-18 get their own login automatically.</p>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="add-athlete-save">Add athlete</button>`
-    });
+      <p class="hint" style="margin-top:12px">This creates the file. The athlete claims it by signing up with the same email — or you can leave it unclaimed.</p>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-athlete">Add</button>` });
   },
-  "add-athlete-save"(){
-    const name = $("#na-name").value.trim();
-    if(!name){ toast("Add a name"); return; }
-    DB.roster.unshift({
-      id:"r"+Date.now(), name,
-      sport:$("#na-sport").value.trim()||"—",
-      school:$("#na-school").value.trim()||"—",
-      grade:$("#na-grade").value,
-      flag:"Needs profile update", deals:0, earned:0, reach:0, note:""
-    });
-    closeModal(); render(); toast(name+" added — invite sent");
+  async "save-athlete"(){
+    const first_name = $("#na-first").value.trim(), last_name = $("#na-last").value.trim();
+    if(!first_name || !last_name){ toast("Add a name", true); return; }
+    if(await q(sb.from("athletes").insert({
+      first_name, last_name,
+      sport:$("#na-sport").value.trim()||null, school:$("#na-school").value.trim()||null,
+      roster_flag:"Needs profile update"
+    }).select(),"athlete")){ closeModal(); render(); toast("Athlete added"); }
   },
-  "run-bulk"(){
-    openModal({
-      title:"Bulk outreach",
-      body:`<p class="hint" style="margin-bottom:14px">One brief, one brand, pitched for every athlete you pick. Each email is written from that athlete's own stats.</p>
-      <div class="form-grid">
-        <div class="f"><label for="bo-brand">Brand</label>
-          <select id="bo-brand">${DB.brands.map(b=>`<option>${esc(b.name)}</option>`).join("")}</select></div>
-        <div class="f"><label for="bo-brief">Brief</label><input id="bo-brief" placeholder="Fall kit launch, multi-sport"></div>
-        <div class="f"><label>Athletes</label>
-          <div class="rows">${DB.roster.map(r=>`
-            <div class="row">
-              <button class="tick done" data-act="toggle-notif" aria-pressed="true" aria-label="Include">${svg("check",13)}</button>
-              <span class="grow"><b>${esc(r.name)}</b><small>${esc(r.sport)} · ${compact(r.reach)} reach</small></span>
-            </div>`).join("")}</div>
-        </div>
-      </div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="run-bulk-send">Generate ${DB.roster.length} emails</button>`
-    });
-  },
-  "run-bulk-send"(){
-    const brand = $("#bo-brand").value;
-    const brief = $("#bo-brief").value.trim() || "Untitled brief";
-    DB.campaigns.unshift({id:"c"+Date.now(), brand, brief, athletes:DB.roster.length, sent:DB.roster.length, replies:0, status:"Active"});
-    closeModal(); go("a-campaigns"); toast(DB.roster.length+" emails drafted for "+brand);
-  },
-  "send-campaign"(el){
-    const c = DB.campaigns.find(x=>x.id===el.dataset.id);
-    c.status = "Active"; c.sent = c.athletes;
-    render(); toast("Campaign sent to "+c.athletes+" athletes");
-  },
-  "campaign-detail"(el){
-    const c = DB.campaigns.find(x=>x.id===el.dataset.id);
-    openModal({
-      title:c.brand,
-      body:`<p class="hint" style="margin-bottom:14px">${esc(c.brief)}</p>
-      <div class="rows">${DB.roster.slice(0,c.athletes).map((r,i)=>`
-        <div class="row">
-          <span class="grow"><b>${esc(r.name)}</b><small>${esc(r.sport)}</small></span>
-          <span class="chip ${i<c.replies?"jade":"neutral"}">${i<c.replies?"Replied":"Sent"}</span>
-        </div>`).join("")}</div>`,
-      foot:`<button class="btn btn-primary" data-close>Close</button>`
-    });
-  },
-  "add-contact"(){
-    openModal({
-      title:"Add a brand contact",
+  "add-brand"(){
+    openModal({ title:"Add a brand",
       body:`<div class="form-grid two">
-        <div class="f"><label for="ct-brand">Brand</label><input id="ct-brand"></div>
-        <div class="f"><label for="ct-person">Contact name</label><input id="ct-person"></div>
-        <div class="f"><label for="ct-role">Role</label><input id="ct-role" placeholder="Brand Partnerships"></div>
-        <div class="f"><label for="ct-email">Email</label><input id="ct-email" type="email"></div>
+        <div class="f"><label for="b-name">Name</label><input id="b-name"></div>
+        <div class="f"><label for="b-cat">Category</label><input id="b-cat" placeholder="Athletic apparel"></div>
+        <div class="f span"><label for="b-looks">What they look for</label><textarea id="b-looks" style="min-height:70px"></textarea></div>
+        <div class="f"><label for="b-status">Status</label>
+          <select id="b-status"><option>Not contacted</option><option>In progress</option><option>Partnered</option></select></div>
       </div>`,
-      foot:`<button class="btn" data-close>Cancel</button>
-            <button class="btn btn-primary" data-act="add-contact-save">Add contact</button>`
-    });
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-brand">Add</button>` });
   },
-  "add-contact-save"(){
-    const brand = $("#ct-brand").value.trim();
-    if(!brand){ toast("Which brand?"); return; }
-    DB.contacts.unshift({brand, person:$("#ct-person").value.trim()||"—",
-      role:$("#ct-role").value.trim()||"—", email:$("#ct-email").value.trim()||"—",
-      last:"Today", deals:0});
-    closeModal(); render(); toast("Contact added");
+  async "save-brand"(){
+    const name = $("#b-name").value.trim();
+    if(!name){ toast("Add a name", true); return; }
+    if(await q(sb.from("brands").insert({
+      name, category:$("#b-cat").value.trim()||null,
+      looks_for:$("#b-looks").value.trim()||null, status:$("#b-status").value
+    }).select(),"brand")){ closeModal(); render(); toast("Brand added"); }
   },
-  "export-roster"(){
-    const rows = [["Athlete","Sport","School","Status","Deals","Earned","Commission"],
-      ...DB.roster.map(r=>[r.name,r.sport,r.school,r.flag,r.deals,r.earned,Math.round(r.earned*0.15)])];
-    const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-    const a = document.createElement("a");
-    a.href = url; a.download = "oma-roster.csv"; a.click();
-    URL.revokeObjectURL(url);
-    toast("Report exported");
+  async "add-contact"(){
+    const brands = await load.brands() || [];
+    if(!brands.length){ toast("Add a brand first", true); return; }
+    openModal({ title:"Add a contact",
+      body:`<div class="form-grid two">
+        <div class="f"><label for="c-brand">Brand</label><select id="c-brand">${brands.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("")}</select></div>
+        <div class="f"><label for="c-person">Name</label><input id="c-person"></div>
+        <div class="f"><label for="c-role">Role</label><input id="c-role"></div>
+        <div class="f"><label for="c-email">Email</label><input id="c-email" type="email"></div>
+      </div>`,
+      foot:`<button class="btn" data-close>Cancel</button><button class="btn btn-primary" data-act="save-contact">Add</button>` });
+  },
+  async "save-contact"(){
+    if(await q(sb.from("brand_contacts").insert({
+      brand_id:$("#c-brand").value, person:$("#c-person").value.trim()||null,
+      job_title:$("#c-role").value.trim()||null, email:$("#c-email").value.trim()||null
+    }).select(),"contact")){ closeModal(); render(); toast("Contact added"); }
   },
 
-  /* ---- settings ---- */
-  "save-settings"(){ toast("Settings saved"); },
-  "toggle-notif"(el){
-    el.classList.toggle("done");
-    el.setAttribute("aria-pressed", el.classList.contains("done"));
+  /* ---- exports & print ---- */
+  "print-kit"(){ toast("Opening print view"); setTimeout(()=>window.print(),400); },
+  async "export-payments"(){
+    const rows = await load.payments() || [];
+    csv("payments.csv", [["Source","Amount","Date"], ...rows.map(p=>[p.source,(p.amount_cents/100).toFixed(2),p.received_on])]);
+  },
+  async "export-roster"(){
+    const rows = state.roster;
+    csv("roster.csv", [["First","Last","Sport","School","Status"],
+      ...rows.map(r=>[r.first_name,r.last_name,r.sport,r.school,r.roster_flag])]);
   }
 };
 
-/* ---- email drafting (template-based stand-in for the LLM) ---- */
-function draftEmail(brand, tplId){
-  const a = DB.athlete;
-  const reach = compact(totalReach());
-  const top = a.socials.slice().sort((x,y)=>y.followers-x.followers)[0];
-  const b = DB.brands.find(x=>x.name===brand);
-
-  const openers = {
-    tp1:`Hi there,\n\nI'm ${a.first} ${a.last}, a ${a.grade.toLowerCase()} ${a.position.toLowerCase()} at ${a.school} in ${a.hometown}. I follow ${brand} closely and I think my audience is your audience.\n\nWhere I stand right now: ${reach} followers across four platforms, ${a.engagement} engagement, and an audience that's ${a.audience.toLowerCase()}. My strongest channel is ${top.net} at ${compact(top.followers)}.\n\n${a.bioShort}${b?` I noticed you look for ${b.looks.toLowerCase().replace(/\.$/,"")} — that's exactly where I sit.`:""}\n\nI've attached my media kit. If there's a fit, my guardian ${a.guardian.name} handles scheduling and can be reached at ${a.guardian.email}.\n\nThank you for the time,\n${a.first}`,
-
-    tp2:`Hi again,\n\nFollowing up on my note about a partnership with ${brand} — I know inboxes get full.\n\nQuick recap: ${reach} total followers, ${a.engagement} engagement, ${a.audience.toLowerCase()}. Since I wrote, ${a.achievements[0].toLowerCase()}.\n\nHappy to send fresh content examples or hop on a 15-minute call. If the timing is wrong, just say so and I'll check back next season.\n\nThanks,\n${a.first}`,
-
-    tp3:`Hi,\n\nThank you for making the time — I enjoyed the conversation.\n\nTo recap what we discussed: I'd cover the campaign across ${top.net} and my other channels, with content approval routed through ${a.guardian.name} before anything posts.\n\nI'll get you the draft concepts by the end of the week. Anything else you need from my side in the meantime, just ask.\n\nSpeak soon,\n${a.first}`,
-
-    tp4:`Hi,\n\nGreat news — I'd like to move ahead with ${brand}.\n\nAs agreed, please send the agreement to my guardian ${a.guardian.name} at ${a.guardian.email}. She signs on my behalf since I'm ${a.age}. Operation Millionaire Athletes will review alongside her.\n\nOnce it's signed I can start on the deliverables straight away. My availability: ${a.availability}\n\nLooking forward to it,\n${a.first}`
-  };
-  return openers[tplId] || openers.tp1;
+function csv(filename, rows){
+  const text = rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const url = URL.createObjectURL(new Blob([text],{type:"text/csv"}));
+  const a = document.createElement("a"); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url); toast("Exported");
 }
 
 /* ============================================================
-   7. EVENT WIRING
+   EVENTS
    ============================================================ */
 
 document.addEventListener("click", e=>{
   const goEl = e.target.closest("[data-go]");
-  if(goEl){ e.preventDefault(); closeModal(); go(goEl.dataset.go); return; }
-
-  if(e.target.closest("[data-close]")){ closeModal(); return; }
-  if(e.target.matches("[data-close-scrim]")){ closeModal(); return; }
-
-  const actEl = e.target.closest("[data-act]");
-  if(actEl){
-    const fn = ACTIONS[actEl.dataset.act];
-    if(fn){ e.preventDefault(); fn(actEl); }
-  }
+  if(goEl){ e.preventDefault(); go(goEl.dataset.go); return; }
+  if(e.target.closest("[data-close]") || e.target.matches("[data-close-scrim]")){ closeModal(); return; }
+  const el = e.target.closest("[data-act]");
+  if(el && ACT[el.dataset.act]){ e.preventDefault(); ACT[el.dataset.act](el); }
 });
 
 document.addEventListener("keydown", e=>{
   if(e.target.id==="msg" && e.key==="Enter" && !e.shiftKey){
-    e.preventDefault(); ACTIONS["send-msg"]();
+    e.preventDefault();
+    const btn = document.querySelector('[data-act="send-msg"]');
+    if(btn) ACT["send-msg"](btn);
+  }
+  if(e.target.id==="g-pass" && e.key==="Enter"){
+    ACT[gateMode==="signin"?"do-signin":"do-signup"]();
   }
 });
 
-document.addEventListener("input", e=>{
-  if(e.target.id==="msg"){
-    e.target.style.height = "auto";
-    e.target.style.height = Math.min(e.target.scrollHeight,130)+"px";
-  }
-});
-
-$("#search")?.addEventListener("keydown", e=>{
-  if(e.key==="Enter" && e.target.value.trim()){
-    toast(`Searching for "${e.target.value.trim()}"`);
-  }
-});
-
-/* ---- boot ---- */
-if(!location.hash) location.hash = "#dashboard";
-render();
+boot();
 </script>
+
 </body>
 </html>
