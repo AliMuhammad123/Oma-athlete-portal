@@ -120,6 +120,19 @@ input,select,textarea{font:inherit;color:inherit}
   .layout{padding-left:var(--sidebar)}
   .topbar-in,.shell{max-width:calc(var(--shell) - 120px)}
 }
+.rolepill{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:rgba(255,255,255,.07);border:1px solid rgba(235,215,160,.28);
+  border-radius:12px;padding:9px 11px;margin:0 0 18px;color:#fff;
+}
+.rolepill:hover{background:rgba(255,255,255,.12)}
+.rolepill small{display:block;font-size:11px;color:rgba(235,215,160,.7)}
+.rolepill b{font-size:14px;font-weight:600}
+.rolepill svg{margin-left:auto;color:var(--gold-lite);flex:none}
+.rolepill-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}
+.rolebtn{display:flex}
+@media(min-width:1000px){.rolebtn{display:none}}
+
 .nav-group{margin-bottom:20px}
 .nav-label{
   font-size:11px;color:rgba(235,215,160,.55);letter-spacing:.04em;
@@ -551,6 +564,11 @@ input,select,textarea{font:inherit;color:inherit}
     <span class="mark-badge">OM</span>
     <span class="mark-text">Athletes<span> Portal</span></span>
   </a>
+  <button class="rolepill" data-act="switch-role" aria-label="Switch portal">
+    <span class="rolepill-dot"></span>
+    <span><small>Viewing as</small><b id="rolename">Athlete</b></span>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></svg>
+  </button>
   <nav class="nav-group" id="sidenav" aria-label="Main"></nav>
   <nav class="nav-group">
     <p class="nav-label">Account</p>
@@ -578,6 +596,9 @@ input,select,textarea{font:inherit;color:inherit}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="search" placeholder="Search brands, deals, photos" aria-label="Search" id="search">
       </div>
+      <button class="icon-btn rolebtn" data-act="switch-role" aria-label="Switch portal">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m7 9 5-5 5 5M7 15l5 5 5-5"/></svg>
+      </button>
       <button class="icon-btn" data-go="messages" aria-label="Notifications">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
         <span class="dot"></span>
@@ -651,14 +672,40 @@ const DB = {
   ],
 
   deals:[
-    {id:"d1", brand:"Rosewater Skin", type:"Social post bundle", value:1200, status:"Paid", paid:"2026-09-05",
+    {id:"d1", brand:"Rosewater Skin", type:"Social post bundle", value:1200, status:"Paid", paid:"2026-09-05", approval:"Approved",
      deliverables:[{t:"3 IG stories, launch week", done:true},{t:"1 in-feed reel", done:true}], contract:"rosewater-agreement.pdf"},
-    {id:"d2", brand:"Lumen Athletic", type:"Ambassador — 6 months", value:6000, status:"Signed", paid:"2026-10-01",
+    {id:"d2", brand:"Lumen Athletic", type:"Ambassador — 6 months", value:6000, status:"Signed", paid:"2026-10-01", approval:"Approved",
      deliverables:[{t:"2 posts per month", done:false},{t:"Wear kit at 4 home games", done:true},{t:"1 appearance at fall launch", done:false}], contract:"lumen-ambassador.pdf"},
-    {id:"d3", brand:"Cordial Foods", type:"Appearance", value:850, status:"Pending", paid:"—",
-     deliverables:[{t:"2hr store appearance, Nov 8", done:false}], contract:null},
-    {id:"d4", brand:"Fulton Sports Co.", type:"Product seeding", value:400, status:"Completed", paid:"2026-07-22",
+    {id:"d3", brand:"Cordial Foods", type:"Appearance", value:850, status:"Pending", paid:"—", approval:"Awaiting approval",
+     deliverables:[{t:"2hr store appearance, Nov 8", done:false}], contract:null,
+     terms:"Two hours in-store, Nov 8, 11am–1pm. Travel covered. No exclusivity clause. Payment 30 days after the appearance."},
+    {id:"d4", brand:"Fulton Sports Co.", type:"Product seeding", value:400, status:"Completed", paid:"2026-07-22", approval:"Approved",
      deliverables:[{t:"1 unboxing reel", done:true}], contract:"fulton-terms.pdf"}
+  ],
+
+  /* ---- roster & agency data (admin portal) ---- */
+  role:"athlete",
+
+  roster:[
+    {id:"r1", name:"Jayda Whitmore", sport:"Basketball", school:"Marist Preparatory", grade:"Junior", flag:"Active", deals:4, earned:3700, reach:124200, note:"Lumen call Thursday. Strongest comeback story on the roster."},
+    {id:"r2", name:"Deshawn Alvarez", sport:"Football", school:"Northside High", grade:"Senior", flag:"In negotiation", deals:3, earned:8200, reach:210400, note:"Two offers on the table. Waiting on guardian sign-off."},
+    {id:"r3", name:"Mia Okonkwo", sport:"Track", school:"Riverbend Academy", grade:"Sophomore", flag:"Needs profile update", deals:1, earned:750, reach:34800, note:"No headshots uploaded since March. Chase her."},
+    {id:"r4", name:"Cole Brennan", sport:"Baseball", school:"St. Aidan's", grade:"Junior", flag:"Active", deals:2, earned:2400, reach:51900, note:""},
+    {id:"r5", name:"Amara Silva", sport:"Volleyball", school:"Marist Preparatory", grade:"Senior", flag:"Active", deals:5, earned:11400, reach:298000, note:"Top earner. Renewal due in November."},
+    {id:"r6", name:"Tyler Nakamura", sport:"Soccer", school:"Northside High", grade:"Freshman", flag:"Needs profile update", deals:0, earned:0, reach:8900, note:"Just signed. Onboarding call not booked yet."}
+  ],
+
+  campaigns:[
+    {id:"c1", brand:"Lumen Athletic", brief:"Fall kit launch — 6 athletes, multi-sport", athletes:6, sent:6, replies:2, status:"Active"},
+    {id:"c2", brand:"Halo Hydration", brief:"Endurance and court sports, spring roster", athletes:4, sent:4, replies:0, status:"Active"},
+    {id:"c3", brand:"Studyline", brief:"Student-athletes, 3.5 GPA and above", athletes:3, sent:0, replies:0, status:"Draft"}
+  ],
+
+  contacts:[
+    {brand:"Lumen Athletic", person:"Dara Simms", role:"Brand Partnerships", email:"dara@lumenathletic.com", last:"Sep 3, 2026", deals:2},
+    {brand:"Rosewater Skin", person:"Elle Ntumba", role:"Founder", email:"elle@rosewaterskin.com", last:"Jun 19, 2026", deals:1},
+    {brand:"Cordial Foods", person:"Marcus Bell", role:"Marketing", email:"m.bell@cordialfoods.com", last:"Aug 28, 2026", deals:0},
+    {brand:"Halo Hydration", person:"Tom Reyes", role:"Growth", email:"tom@halohydration.com", last:"Aug 11, 2026", deals:0}
   ],
 
   payments:[
@@ -812,7 +859,7 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
    3. NAVIGATION
    ============================================================ */
 
-const NAV = [
+const NAV_ATHLETE = [
   {id:"dashboard", label:"Dashboard", icon:"home",    tab:true},
   {id:"profile",   label:"Profile",   icon:"user"},
   {id:"mediakit",  label:"Media kit", icon:"kit",     tab:true},
@@ -823,24 +870,71 @@ const NAV = [
   {id:"messages",  label:"Messages",  icon:"chat"}
 ];
 
+const NAV_PARENT = [
+  {id:"p-dashboard", label:"Overview",  icon:"home",  tab:true},
+  {id:"p-approvals", label:"Approvals", icon:"check", tab:true},
+  {id:"p-earnings",  label:"Earnings",  icon:"deals", tab:true},
+  {id:"p-messages",  label:"Messages",  icon:"chat",  tab:true},
+  {id:"p-privacy",   label:"Privacy",   icon:"lock"}
+];
+
+const NAV_ADMIN = [
+  {id:"a-roster",    label:"Roster",    icon:"user",   tab:true},
+  {id:"a-campaigns", label:"Campaigns", icon:"mail",   tab:true},
+  {id:"a-funding",   label:"Funding",   icon:"deals",  tab:true},
+  {id:"a-crm",       label:"Brands",    icon:"brands", tab:true},
+  {id:"a-athlete",   label:"Athlete file", icon:"kit"}
+];
+
+const ROLES = {
+  athlete:{label:"Athlete",         who:"Jayda Whitmore",  nav:NAV_ATHLETE, home:"dashboard",  group:"Your portal"},
+  parent: {label:"Parent/guardian", who:"Renée Whitmore",  nav:NAV_PARENT,  home:"p-dashboard",group:"Guardian view"},
+  admin:  {label:"OMA staff",       who:"Tasha Boyd",      nav:NAV_ADMIN,   home:"a-roster",   group:"Agency tools"}
+};
+
+function roleOf(route){
+  if(route.startsWith("p-")) return "parent";
+  if(route.startsWith("a-")) return "admin";
+  // Staff opening an athlete's media kit or gallery stay in the admin portal —
+  // §5.2 gives them full edit access to any athlete's file.
+  if(DB.role==="admin" && ["mediakit","gallery","profile"].includes(route)) return "admin";
+  return "athlete";
+}
+
 function renderNav(){
   const cur = current();
+  const role = ROLES[DB.role];
+  const nav = role.nav;
+
   $("#sidenav").innerHTML =
-    `<p class="nav-label">Your portal</p>` +
-    NAV.map(n=>{
-      const badge = n.id==="messages" ? `<span class="nav-count">2</span>` : "";
+    `<p class="nav-label">${esc(role.group)}</p>` +
+    nav.map(n=>{
+      let badge = "";
+      if(n.id==="messages" || n.id==="p-messages") badge = `<span class="nav-count">2</span>`;
+      if(n.id==="p-approvals"){
+        const c = DB.deals.filter(d=>d.approval==="Awaiting approval").length;
+        if(c) badge = `<span class="nav-count">${c}</span>`;
+      }
       return `<button class="nav-item" data-go="${n.id}" ${cur===n.id?'aria-current="page"':""}>${svg(n.icon,17)}${n.label}${badge}</button>`;
     }).join("");
 
-  const tabs = NAV.filter(n=>n.tab);
+  if(DB.role==="admin" && !nav.some(n=>n.id===cur)){
+    $("#sidenav").insertAdjacentHTML("beforeend",
+      `<button class="nav-item" aria-current="page" data-go="a-athlete">${svg("kit",17)}Viewing athlete file</button>`);
+  }
+
+  const tabs = nav.filter(n=>n.tab);
   $("#tabbar").innerHTML =
     tabs.map(n=>`<button class="tab" data-go="${n.id}" ${cur===n.id?'aria-current="page"':""}>${svg(n.icon,21)}<span>${n.label}</span></button>`).join("") +
-    `<button class="tab" data-act="more" ${!tabs.some(t=>t.id===cur)&&cur!=="dashboard"?'aria-current="page"':""}>${svg("more",21)}<span>More</span></button>`;
+    `<button class="tab" data-act="more" ${!tabs.some(t=>t.id===cur)?'aria-current="page"':""}>${svg("more",21)}<span>More</span></button>`;
+
+  $("#rolename").textContent = ROLES[DB.role].label;
 }
 
 function current(){ return (location.hash||"#dashboard").slice(1).split("?")[0]; }
 
 function go(id){
+  DB.role = roleOf(id);
   if(current()===id){ render(); return; }
   location.hash = "#"+id;
 }
@@ -1414,16 +1508,430 @@ VIEWS.settings = () => `
   </section>`;
 
 /* ============================================================
+   4b. PARENT PORTAL
+   ============================================================ */
+
+VIEWS["p-dashboard"] = () => {
+  const a = DB.athlete;
+  const waiting = DB.deals.filter(d=>d.approval==="Awaiting approval");
+  const earned = DB.payments.reduce((s,p)=>s+p.amt,0);
+  const active = DB.deals.filter(d=>["Signed","Active"].includes(d.status)).length;
+
+  return `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow">
+        <h1>${esc(a.first)}'s account</h1>
+        <p>You see everything she does here. Nothing becomes a contract without you.</p>
+      </div>
+    </div>
+
+    ${waiting.length ? `
+    <div class="panel" style="border-color:var(--gold);background:#FEFBF3">
+      <div class="panel-head">
+        <span class="grow"><b style="font-size:15px">${waiting.length} deal${waiting.length>1?"s":""} waiting on you</b>
+        <small class="hint" style="display:block">${esc(waiting.map(d=>d.brand).join(", "))}</small></span>
+      </div>
+      <button class="btn btn-gold" data-go="p-approvals">Review ${waiting.length>1?"them":"it"}</button>
+    </div>` : ""}
+
+    <div class="strip">
+      <div><b>${money(earned)}</b><span>Earned to date</span></div>
+      <div><b>${active}</b><span>Active deals</span></div>
+      <div><b>${compact(totalReach())}</b><span>Total reach</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">What she's been doing</h2></div>
+      <div class="rows">
+        ${DB.activity.map(x=>`
+        <div class="row">
+          <span class="brandmark ${x.kind==="paid"?"g":x.kind==="opened"?"i":""}">${esc(x.who.slice(0,2).toUpperCase())}</span>
+          <span class="grow"><b>${esc(x.who)}</b><small>${esc(x.what)}</small></span>
+          <small class="hint">${esc(x.when)}</small>
+        </div>`).join("")}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">Commitments she's made</h2>
+        <button class="btn btn-ghost btn-sm" data-go="p-approvals">All deals</button></div>
+      <div class="rows">
+        ${DB.deals.filter(d=>d.approval==="Approved").flatMap(d=>
+          d.deliverables.filter(x=>!x.done).map(x=>`
+          <div class="row">
+            <span class="grow"><b>${esc(x.t)}</b><small>${esc(d.brand)}</small></span>
+            <span class="chip gold">Outstanding</span>
+          </div>`)).join("") || `<div class="row"><span class="grow"><b>Nothing outstanding</b><small>Every deliverable is done.</small></span></div>`}
+      </div>
+    </div>
+  </section>`;
+};
+
+VIEWS["p-approvals"] = () => {
+  const waiting = DB.deals.filter(d=>d.approval==="Awaiting approval");
+  const done = DB.deals.filter(d=>d.approval!=="Awaiting approval");
+
+  const card = (d,pending) => `
+    <div class="panel" ${pending?'style="border-color:var(--gold)"':""}>
+      <div class="record-top">
+        <span class="brandmark ${d.status==="Paid"?"g":""}">${esc(d.brand.slice(0,2).toUpperCase())}</span>
+        <span class="grow"><b>${esc(d.brand)}</b><small>${esc(d.type)}</small></span>
+        <span style="text-align:right">
+          <b style="font-family:var(--f-display);font-size:20px;display:block">${money(d.value)}</b>
+          <span class="chip ${pending?"gold":"jade"}">${esc(d.approval)}</span>
+        </span>
+      </div>
+      ${d.terms?`<p class="hint" style="margin:12px 0">${esc(d.terms)}</p>`:""}
+      <div class="rows" style="margin:12px 0">
+        ${d.deliverables.map(x=>`<div class="row"><span class="grow"><b>${esc(x.t)}</b></span>
+          <span class="chip ${x.done?"jade":"neutral"}">${x.done?"Done":"To do"}</span></div>`).join("")}
+      </div>
+      ${pending ? `
+        <div class="btn-row">
+          <button class="btn btn-primary" data-act="approve-deal" data-id="${d.id}">${svg("check",15)}Approve</button>
+          <button class="btn" data-act="request-changes" data-id="${d.id}">Request changes</button>
+        </div>`
+      : `<p class="hint">${d.contract?"Contract on file: "+esc(d.contract):"No contract uploaded yet."}</p>`}
+    </div>`;
+
+  return `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow">
+        <h1>Deal approvals</h1>
+        <p>Jayda is 17, so nothing activates until you say yes.</p>
+      </div>
+    </div>
+    ${waiting.length ? waiting.map(d=>card(d,true)).join("")
+      : `<div class="empty"><h3>Nothing waiting</h3><p>You'll get an email the moment a new deal needs your sign-off.</p></div>`}
+    <div class="divider"></div>
+    <h2 style="font-size:16px;margin-bottom:12px">Already approved</h2>
+    ${done.map(d=>card(d,false)).join("")}
+  </section>`;
+};
+
+VIEWS["p-earnings"] = () => {
+  const total = DB.payments.reduce((s,p)=>s+p.amt,0);
+  return `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow"><h1>Earnings</h1><p>Every dollar in, and where it came from. Read-only.</p></div>
+    </div>
+    <div class="strip">
+      <div><b>${money(total)}</b><span>Received</span></div>
+      <div><b>${DB.payments.length}</b><span>Payments</span></div>
+      <div><b>${money(DB.deals.filter(d=>!["Paid","Completed"].includes(d.status)).reduce((s,d)=>s+d.value,0))}</b><span>Committed, unpaid</span></div>
+    </div>
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn" data-act="export-report">${svg("down",16)}Export for tax records</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">Payments received</h2></div>
+      <div class="rows">
+        ${DB.payments.map(p=>`
+        <div class="row"><span class="grow"><b>${esc(p.src)}</b><small>${esc(p.date)}</small></span>
+        <b style="font-family:var(--f-display);font-size:17px">${money(p.amt)}</b></div>`).join("")}
+      </div>
+      <p class="hint" style="margin-top:12px">NIL income is taxable. Keep this export for your records.</p>
+    </div>
+  </section>`;
+};
+
+VIEWS["p-messages"] = () => `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow"><h1>Messages</h1><p>Direct line to the OMA team.</p></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="brandmark">TB</span>
+        <span class="grow"><b>Tasha Boyd</b><small class="hint">Jayda's OMA agent</small></span>
+      </div>
+      <div class="thread">
+        <div class="msg them">Hi Renée — Cordial Foods came in with an appearance offer. It's in your approvals queue. No exclusivity, travel covered.<small>8:40 AM</small></div>
+        <div class="msg me">Thanks. Is the Nov 8 date a school day?<small>9:02 AM</small></div>
+        <div class="msg them">Saturday. I checked before sending it over.<small>9:05 AM</small></div>
+      </div>
+      <div class="composer">
+        <textarea id="msg" rows="1" placeholder="Message Tasha" aria-label="Message"></textarea>
+        <button class="btn btn-primary" data-act="send-msg" aria-label="Send">${svg("send",17)}</button>
+      </div>
+    </div>
+  </section>`;
+
+VIEWS["p-privacy"] = () => `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow"><h1>Privacy</h1><p>What the public can see on Jayda's profile. You can change any of it.</p></div>
+    </div>
+    <div class="panel">
+      <div class="rows">
+        ${[["Name and sport",true,"locked"],["Bio and achievements",true,""],["Social handles and follower counts",true,""],["GPA and academic honors",DB.athlete.gpaPublic,"gpa"],["Height and weight",true,""],["Contact details",false,""],["Hometown",true,""],["School name",true,""]]
+          .map(([l,on,key])=>`
+          <div class="row">
+            <span class="grow"><b>${esc(l)}</b>${key==="locked"?'<small>Always visible</small>':""}</span>
+            <button class="tick ${on?"done":""}" ${key==="locked"?"disabled style=opacity:.45":`data-act="toggle-privacy" data-key="${key}"`} aria-pressed="${on}" aria-label="Toggle">${svg("check",13)}</button>
+          </div>`).join("")}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">Who else can see her file</h2></div>
+      <div class="rows">
+        <div class="row"><span class="grow"><b>Tasha Boyd</b><small>OMA agent — full access</small></span><span class="chip jade">Allowed</span></div>
+        <div class="row"><span class="grow"><b>OMA admin team</b><small>Roster and funding records</small></span><span class="chip jade">Allowed</span></div>
+        <div class="row"><span class="grow"><b>Brands</b><small>Only what's in the shared media kit</small></span><span class="chip neutral">Limited</span></div>
+      </div>
+    </div>
+  </section>`;
+
+/* ============================================================
+   4c. ADMIN PORTAL
+   ============================================================ */
+
+VIEWS["a-roster"] = () => {
+  const total = DB.roster.reduce((s,r)=>s+r.earned,0);
+  const flags = f => DB.roster.filter(r=>r.flag===f).length;
+  return `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow"><h1>Roster</h1><p>Every athlete OMA represents, and who needs attention today.</p></div>
+    </div>
+
+    <div class="strip">
+      <div><b>${DB.roster.length}</b><span>Athletes</span></div>
+      <div><b>${money(total)}</b><span>Roster earnings</span></div>
+      <div><b>${flags("Needs profile update")}</b><span>Need chasing</span></div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn btn-primary" data-act="add-athlete">${svg("plus",16)}Add athlete</button>
+      <button class="btn" data-act="run-bulk">${svg("mail",16)}Run bulk outreach</button>
+      <button class="btn" data-act="export-roster">${svg("down",16)}Export report</button>
+    </div>
+
+    <div class="panel">
+      <div class="table-wrap table-scroll">
+        <table class="tracker">
+          <thead><tr><th>Athlete</th><th>Sport</th><th>School</th><th>Status</th><th>Deals</th><th>Earned</th><th></th></tr></thead>
+          <tbody>
+            ${DB.roster.map(r=>`
+            <tr>
+              <td><b>${esc(r.name)}</b><small>${esc(r.grade)}</small></td>
+              <td>${esc(r.sport)}</td>
+              <td>${esc(r.school)}</td>
+              <td><span class="chip ${statusClass(r.flag)}">${esc(r.flag)}</span></td>
+              <td>${r.deals}</td>
+              <td>${money(r.earned)}</td>
+              <td style="text-align:right"><button class="btn btn-sm" data-act="open-athlete" data-id="${r.id}">Open</button></td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div class="cards-only">
+        ${DB.roster.map(r=>`
+        <div class="record">
+          <div class="record-top">
+            <span class="brandmark">${esc(r.name.split(" ").map(w=>w[0]).join(""))}</span>
+            <span class="grow"><b>${esc(r.name)}</b><small>${esc(r.sport)} · ${esc(r.school)}</small></span>
+            <span class="chip ${statusClass(r.flag)}">${esc(r.flag)}</span>
+          </div>
+          <dl>
+            <div><dt>Deals</dt><dd>${r.deals}</dd></div>
+            <div><dt>Earned</dt><dd>${money(r.earned)}</dd></div>
+          </dl>
+          <button class="btn btn-sm" data-act="open-athlete" data-id="${r.id}">Open file</button>
+        </div>`).join("")}
+      </div>
+    </div>
+  </section>`;
+};
+
+VIEWS["a-athlete"] = () => {
+  const r = DB.roster.find(x=>x.id===DB.openAthlete) || DB.roster[0];
+  return `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow">
+        <h1>${esc(r.name)}</h1>
+        <p>${esc(r.sport)} · ${esc(r.school)} · ${esc(r.grade)}</p>
+      </div>
+      <button class="btn" data-go="a-roster">Back to roster</button>
+    </div>
+
+    <div class="strip">
+      <div><b>${r.deals}</b><span>Deals</span></div>
+      <div><b>${money(r.earned)}</b><span>Earned</span></div>
+      <div><b>${compact(r.reach)}</b><span>Reach</span></div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn btn-primary" data-act="edit-profile">${svg("edit",16)}Edit their profile</button>
+      <button class="btn" data-go="mediakit">${svg("kit",16)}Their media kit</button>
+      <button class="btn" data-go="gallery">${svg("gallery",16)}Their gallery</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">Internal notes</h2>
+        <span class="chip neutral plain">Staff only</span></div>
+      <div class="f"><textarea id="a-note" style="min-height:90px">${esc(r.note)}</textarea></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-primary btn-sm" data-act="save-note" data-id="${r.id}">Save note</button>
+        <button class="btn btn-sm" data-act="set-flag" data-id="${r.id}">Change status</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">Outreach on their behalf</h2></div>
+      <div class="rows">
+        ${DB.outreach.slice(0,3).map(o=>`
+        <div class="row">
+          <span class="grow"><b>${esc(o.brand)}</b><small>${esc(o.contact)}</small></span>
+          <span class="chip ${statusClass(o.status)}">${esc(o.status)}</span>
+        </div>`).join("")}
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-sm btn-gold" data-act="new-email">${svg("spark",15)}Draft on their behalf</button>
+      </div>
+    </div>
+  </section>`;
+};
+
+VIEWS["a-campaigns"] = () => `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow"><h1>Campaigns</h1><p>One brief, pitched across the roster at once.</p></div>
+    </div>
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn btn-primary" data-act="run-bulk">${svg("plus",16)}New campaign</button>
+    </div>
+    ${DB.campaigns.map(c=>`
+      <div class="panel">
+        <div class="record-top">
+          <span class="brandmark ${c.status==="Draft"?"":"g"}">${esc(c.brand.slice(0,2).toUpperCase())}</span>
+          <span class="grow"><b>${esc(c.brand)}</b><small>${esc(c.brief)}</small></span>
+          <span class="chip ${c.status==="Active"?"gold":"neutral"}">${esc(c.status)}</span>
+        </div>
+        <div class="strip" style="margin:14px 0 12px">
+          <div><b>${c.athletes}</b><span>Athletes</span></div>
+          <div><b>${c.sent}</b><span>Sent</span></div>
+          <div><b>${c.replies}</b><span>Replies</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-sm" data-act="campaign-detail" data-id="${c.id}">View responses</button>
+          ${c.status==="Draft"?`<button class="btn btn-sm btn-primary" data-act="send-campaign" data-id="${c.id}">Send to ${c.athletes} athletes</button>`:""}
+        </div>
+      </div>`).join("")}
+
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">Master outreach tracker</h2></div>
+      <div class="rows">
+        ${DB.outreach.map(o=>`
+        <div class="row">
+          <span class="grow"><b>${esc(o.brand)}</b><small>Jayda Whitmore · ${esc(fmt(o.sent))}</small></span>
+          <span class="chip ${statusClass(o.status)}">${esc(o.status)}</span>
+        </div>`).join("")}
+      </div>
+    </div>
+  </section>`;
+
+VIEWS["a-funding"] = () => {
+  const total = DB.roster.reduce((s,r)=>s+r.earned,0);
+  const commission = Math.round(total*0.15);
+  const top = DB.roster.slice().sort((a,b)=>b.earned-a.earned);
+  return `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow"><h1>Funding</h1><p>Everything flowing through the roster, and OMA's cut of it.</p></div>
+    </div>
+    <div class="strip">
+      <div><b>${money(total)}</b><span>Roster earnings</span></div>
+      <div><b>${money(commission)}</b><span>Commission at 15%</span></div>
+      <div><b>${DB.roster.filter(r=>r.earned>0).length}</b><span>Earning athletes</span></div>
+    </div>
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn" data-act="export-roster">${svg("down",16)}Export report</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2 class="grow">By athlete</h2></div>
+      <div class="rows">
+        ${top.map(r=>`
+        <div class="row">
+          <span class="brandmark">${esc(r.name.split(" ").map(w=>w[0]).join(""))}</span>
+          <span class="grow"><b>${esc(r.name)}</b><small>${r.deals} deal${r.deals===1?"":"s"} · ${esc(r.sport)}</small></span>
+          <span style="text-align:right">
+            <b style="font-family:var(--f-display);font-size:17px;display:block">${money(r.earned)}</b>
+            <small class="hint">${money(Math.round(r.earned*0.15))} to OMA</small>
+          </span>
+        </div>`).join("")}
+      </div>
+    </div>
+  </section>`;
+};
+
+VIEWS["a-crm"] = () => `
+  <section class="view">
+    <div class="page-head">
+      <div class="grow"><h1>Brands</h1><p>Contacts, history, and what each one keeps asking for.</p></div>
+    </div>
+    <div class="btn-row" style="margin-bottom:16px">
+      <button class="btn btn-primary" data-act="add-contact">${svg("plus",16)}Add brand contact</button>
+    </div>
+    <div class="panel">
+      <div class="table-wrap table-scroll">
+        <table class="tracker">
+          <thead><tr><th>Brand</th><th>Contact</th><th>Email</th><th>Last touch</th><th>Deals</th></tr></thead>
+          <tbody>
+            ${DB.contacts.map(c=>`
+            <tr>
+              <td><b>${esc(c.brand)}</b></td>
+              <td>${esc(c.person)}<small>${esc(c.role)}</small></td>
+              <td>${esc(c.email)}</td>
+              <td>${esc(c.last)}</td>
+              <td>${c.deals}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div class="cards-only">
+        ${DB.contacts.map(c=>`
+        <div class="record">
+          <div class="record-top">
+            <span class="brandmark i">${esc(c.brand.slice(0,2).toUpperCase())}</span>
+            <span class="grow"><b>${esc(c.brand)}</b><small>${esc(c.person)} · ${esc(c.role)}</small></span>
+          </div>
+          <dl>
+            <div><dt>Last touch</dt><dd>${esc(c.last)}</dd></div>
+            <div><dt>Deals</dt><dd>${c.deals}</dd></div>
+          </dl>
+        </div>`).join("")}
+      </div>
+    </div>
+    ${DB.brands.map(b=>`
+      <div class="panel">
+        <div class="record-top">
+          <span class="brandmark ${b.cls}">${esc(b.mark)}</span>
+          <span class="grow"><b>${esc(b.name)}</b><small>${esc(b.cat)}</small></span>
+          <span class="chip ${statusClass(b.status)}">${esc(b.status)}</span>
+        </div>
+        <p class="hint" style="margin-top:10px">${esc(b.looks)}</p>
+      </div>`).join("")}
+  </section>`;
+
+/* ============================================================
    5. RENDER
    ============================================================ */
 
 function render(){
   const id = current();
-  const fn = VIEWS[id] || VIEWS.dashboard;
+  DB.role = roleOf(id);
+  const fn = VIEWS[id] || VIEWS[ROLES[DB.role].home];
   $("#view").innerHTML = fn();
   renderNav();
-  document.title = "OMA — " + (NAV.find(n=>n.id===id)?.label || "Athlete Portal");
-  $("#topavatar").textContent = initials();
+  const item = ROLES[DB.role].nav.find(n=>n.id===id);
+  document.title = "OMA — " + (item?.label || ROLES[DB.role].label);
+  $("#topavatar").textContent = DB.role==="athlete" ? initials()
+    : ROLES[DB.role].who.split(" ").map(w=>w[0]).join("");
 }
 
 /* ============================================================
@@ -1434,11 +1942,13 @@ const ACTIONS = {
 
   /* ---- nav ---- */
   more(){
+    const rest = ROLES[DB.role].nav.filter(n=>!n.tab);
     openModal({
       title:"More",
       body:`<div class="sheet-list">
-        ${NAV.filter(n=>!n.tab).map(n=>`<button data-go="${n.id}">${svg(n.icon,19)}${n.label}</button>`).join("")}
-        <button data-go="settings">${svg("settings",19)}Settings</button>
+        ${rest.map(n=>`<button data-go="${n.id}">${svg(n.icon,19)}${n.label}</button>`).join("")}
+        ${DB.role==="athlete"?`<button data-go="settings">${svg("settings",19)}Settings</button>`:""}
+        <button data-act="switch-role">${svg("user",19)}Switch portal</button>
         <button data-act="logout">${svg("logout",19)}Log out</button>
       </div>`
     });
@@ -1894,6 +2404,182 @@ const ACTIONS = {
     render();
     const th = $("#thread"); if(th) th.scrollTop = th.scrollHeight;
     $("#msg").focus();
+  },
+
+  /* ---- role switching ---- */
+  "switch-role"(){
+    openModal({
+      title:"Switch portal",
+      body:`<p class="hint" style="margin-bottom:14px">Three logins, three sets of tools. In the real build these are separate accounts — this switcher is here so you can walk through all three.</p>
+      <div class="sheet-list">
+        ${Object.entries(ROLES).map(([k,r])=>`
+          <button data-act="set-role" data-id="${k}">
+            <span class="brandmark ${k==="admin"?"g":k==="parent"?"i":""}" style="width:34px;height:34px;font-size:13px">${esc(r.who.split(" ").map(w=>w[0]).join(""))}</span>
+            <span><b style="display:block">${esc(r.label)}</b><small class="hint">${esc(r.who)}</small></span>
+          </button>`).join("")}
+      </div>`
+    });
+  },
+  "set-role"(el){
+    closeModal();
+    go(ROLES[el.dataset.id].home);
+    toast("Now viewing as "+ROLES[el.dataset.id].label.toLowerCase());
+  },
+
+  /* ---- parent ---- */
+  "approve-deal"(el){
+    const d = DB.deals.find(x=>x.id===el.dataset.id);
+    openModal({
+      title:"Approve this deal?",
+      body:`<p style="margin-bottom:12px"><b>${esc(d.brand)}</b> — ${esc(d.type)}, ${money(d.value)}.</p>
+      ${d.terms?`<p class="hint" style="margin-bottom:14px">${esc(d.terms)}</p>`:""}
+      <p class="hint">Approving lets Jayda sign and start the deliverables. OMA keeps a copy of the agreement on file.</p>`,
+      foot:`<button class="btn" data-close>Not yet</button>
+            <button class="btn btn-primary" data-act="approve-confirm" data-id="${d.id}">Approve deal</button>`
+    });
+  },
+  "approve-confirm"(el){
+    const d = DB.deals.find(x=>x.id===el.dataset.id);
+    d.approval = "Approved";
+    d.status = "Signed";
+    closeModal(); render(); toast(d.brand+" approved");
+  },
+  "request-changes"(el){
+    const d = DB.deals.find(x=>x.id===el.dataset.id);
+    openModal({
+      title:"Request changes",
+      body:`<p class="hint" style="margin-bottom:14px">This goes to Tasha, not the brand. Jayda sees that changes were requested but not the detail.</p>
+      <div class="f"><label for="rc">What needs to change</label><textarea id="rc" placeholder="The date clashes with the state tournament."></textarea></div>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="request-changes-send" data-id="${d.id}">Send to Tasha</button>`
+    });
+  },
+  "request-changes-send"(){ closeModal(); toast("Sent to Tasha"); },
+
+  /* ---- admin ---- */
+  "open-athlete"(el){ DB.openAthlete = el.dataset.id; go("a-athlete"); },
+  "save-note"(el){
+    const r = DB.roster.find(x=>x.id===el.dataset.id);
+    r.note = $("#a-note").value.trim();
+    toast("Note saved");
+  },
+  "set-flag"(el){
+    const r = DB.roster.find(x=>x.id===el.dataset.id);
+    openModal({
+      title:"Status for "+r.name,
+      body:`<div class="f"><label for="fl">Status</label>
+        <select id="fl">${["Active","In negotiation","Needs profile update","Paused"].map(s=>`<option ${s===r.flag?"selected":""}>${s}</option>`).join("")}</select></div>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="set-flag-save" data-id="${r.id}">Save</button>`
+    });
+  },
+  "set-flag-save"(el){
+    const r = DB.roster.find(x=>x.id===el.dataset.id);
+    r.flag = $("#fl").value;
+    closeModal(); render(); toast(r.name+" marked "+r.flag.toLowerCase());
+  },
+  "add-athlete"(){
+    openModal({
+      title:"Add an athlete",
+      body:`<div class="form-grid two">
+        <div class="f"><label for="na-name">Full name</label><input id="na-name" placeholder="Jordan Reyes"></div>
+        <div class="f"><label for="na-sport">Sport</label><input id="na-sport" placeholder="Soccer"></div>
+        <div class="f"><label for="na-school">School</label><input id="na-school" placeholder="Northside High"></div>
+        <div class="f"><label for="na-grade">Class</label>
+          <select id="na-grade"><option>Freshman</option><option>Sophomore</option><option>Junior</option><option>Senior</option></select></div>
+        <div class="f span"><label for="na-guardian">Guardian email</label><input id="na-guardian" type="email" placeholder="parent@email.com"></div>
+      </div>
+      <p class="hint" style="margin-top:12px">They'll get an invite to set a password. Guardians under-18 get their own login automatically.</p>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="add-athlete-save">Add athlete</button>`
+    });
+  },
+  "add-athlete-save"(){
+    const name = $("#na-name").value.trim();
+    if(!name){ toast("Add a name"); return; }
+    DB.roster.unshift({
+      id:"r"+Date.now(), name,
+      sport:$("#na-sport").value.trim()||"—",
+      school:$("#na-school").value.trim()||"—",
+      grade:$("#na-grade").value,
+      flag:"Needs profile update", deals:0, earned:0, reach:0, note:""
+    });
+    closeModal(); render(); toast(name+" added — invite sent");
+  },
+  "run-bulk"(){
+    openModal({
+      title:"Bulk outreach",
+      body:`<p class="hint" style="margin-bottom:14px">One brief, one brand, pitched for every athlete you pick. Each email is written from that athlete's own stats.</p>
+      <div class="form-grid">
+        <div class="f"><label for="bo-brand">Brand</label>
+          <select id="bo-brand">${DB.brands.map(b=>`<option>${esc(b.name)}</option>`).join("")}</select></div>
+        <div class="f"><label for="bo-brief">Brief</label><input id="bo-brief" placeholder="Fall kit launch, multi-sport"></div>
+        <div class="f"><label>Athletes</label>
+          <div class="rows">${DB.roster.map(r=>`
+            <div class="row">
+              <button class="tick done" data-act="toggle-notif" aria-pressed="true" aria-label="Include">${svg("check",13)}</button>
+              <span class="grow"><b>${esc(r.name)}</b><small>${esc(r.sport)} · ${compact(r.reach)} reach</small></span>
+            </div>`).join("")}</div>
+        </div>
+      </div>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="run-bulk-send">Generate ${DB.roster.length} emails</button>`
+    });
+  },
+  "run-bulk-send"(){
+    const brand = $("#bo-brand").value;
+    const brief = $("#bo-brief").value.trim() || "Untitled brief";
+    DB.campaigns.unshift({id:"c"+Date.now(), brand, brief, athletes:DB.roster.length, sent:DB.roster.length, replies:0, status:"Active"});
+    closeModal(); go("a-campaigns"); toast(DB.roster.length+" emails drafted for "+brand);
+  },
+  "send-campaign"(el){
+    const c = DB.campaigns.find(x=>x.id===el.dataset.id);
+    c.status = "Active"; c.sent = c.athletes;
+    render(); toast("Campaign sent to "+c.athletes+" athletes");
+  },
+  "campaign-detail"(el){
+    const c = DB.campaigns.find(x=>x.id===el.dataset.id);
+    openModal({
+      title:c.brand,
+      body:`<p class="hint" style="margin-bottom:14px">${esc(c.brief)}</p>
+      <div class="rows">${DB.roster.slice(0,c.athletes).map((r,i)=>`
+        <div class="row">
+          <span class="grow"><b>${esc(r.name)}</b><small>${esc(r.sport)}</small></span>
+          <span class="chip ${i<c.replies?"jade":"neutral"}">${i<c.replies?"Replied":"Sent"}</span>
+        </div>`).join("")}</div>`,
+      foot:`<button class="btn btn-primary" data-close>Close</button>`
+    });
+  },
+  "add-contact"(){
+    openModal({
+      title:"Add a brand contact",
+      body:`<div class="form-grid two">
+        <div class="f"><label for="ct-brand">Brand</label><input id="ct-brand"></div>
+        <div class="f"><label for="ct-person">Contact name</label><input id="ct-person"></div>
+        <div class="f"><label for="ct-role">Role</label><input id="ct-role" placeholder="Brand Partnerships"></div>
+        <div class="f"><label for="ct-email">Email</label><input id="ct-email" type="email"></div>
+      </div>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="add-contact-save">Add contact</button>`
+    });
+  },
+  "add-contact-save"(){
+    const brand = $("#ct-brand").value.trim();
+    if(!brand){ toast("Which brand?"); return; }
+    DB.contacts.unshift({brand, person:$("#ct-person").value.trim()||"—",
+      role:$("#ct-role").value.trim()||"—", email:$("#ct-email").value.trim()||"—",
+      last:"Today", deals:0});
+    closeModal(); render(); toast("Contact added");
+  },
+  "export-roster"(){
+    const rows = [["Athlete","Sport","School","Status","Deals","Earned","Commission"],
+      ...DB.roster.map(r=>[r.name,r.sport,r.school,r.flag,r.deals,r.earned,Math.round(r.earned*0.15)])];
+    const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    const a = document.createElement("a");
+    a.href = url; a.download = "oma-roster.csv"; a.click();
+    URL.revokeObjectURL(url);
+    toast("Report exported");
   },
 
   /* ---- settings ---- */
