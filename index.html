@@ -665,8 +665,8 @@ input,select,textarea{font:inherit;color:inherit}
    ============================================================ */
 
 const CONFIG = {
-  url:     "https://kfxecxvbssunmqcjfgge.supabase.co",      // e.g. https://abcdefgh.supabase.co
-  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmeGVjeHZic3N1bm1xY2pmZ2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MzgwOTIsImV4cCI6MjEwNDUxNDA5Mn0.lC2Mt7yKOhQ2uXF1tjrj8iXKqXmD7yuBFWEWPC805ew"
+  url:     "YOUR_SUPABASE_URL",      // e.g. https://abcdefgh.supabase.co
+  anonKey: "YOUR_SUPABASE_ANON_KEY"
 };
 
 /* ============================================================ */
@@ -832,7 +832,12 @@ function authScreen(){
           <b>I'm the athlete</b><span>Build my profile</span></button>
         <button class="roleopt" data-act="gate-role" data-id="guardian" aria-pressed="${gateRole==="guardian"}">
           <b>I'm a parent</b><span>Oversee my athlete</span></button>
+        <button class="roleopt" data-act="gate-role" data-id="staff" aria-pressed="${gateRole==="staff"}"
+          style="grid-column:1/-1">
+          <b>I work at OMA</b><span>Staff access — needs an invite code</span></button>
       </div>
+      ${gateRole==="staff"?`<div class="f"><label for="g-code">Staff invite code</label>
+        <input id="g-code" placeholder="OMA-STAFF-…" autocomplete="off"></div>`:""}
       <div class="f"><label for="g-name">Full name</label><input id="g-name" autocomplete="name"></div>`:""}
     <div class="f"><label for="g-email">Email</label><input id="g-email" type="email" autocomplete="email"></div>
     <div class="f"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="${gateMode==="signin"?"current-password":"new-password"}"></div>
@@ -1421,7 +1426,10 @@ VIEWS.settings = async () => {
         <div class="field"><dt>Email</dt><dd>${esc(state.profile.email)}</dd><span></span></div>
         <div class="field"><dt>Role</dt><dd>Athlete</dd><span></span></div>
       </dl>
-      <div class="btn-row" style="margin-top:14px"><button class="btn" data-act="signout">Sign out</button></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn" data-act="staff-code">I have a staff code</button>
+        <button class="btn" data-act="signout">Sign out</button>
+      </div>
     </div>
   </section>`;
 };
@@ -1545,16 +1553,44 @@ const ACT = {
   async "do-signup"(){
     const email = $("#g-email").value.trim(), password = $("#g-pass").value;
     const full_name = $("#g-name").value.trim();
+    const code = gateRole==="staff" ? ($("#g-code")?.value.trim()||"") : "";
     if(!email || password.length < 6){ gateMsg={text:"Use a valid email and a password of at least 6 characters"}; return authScreen(); }
+    if(gateRole==="staff" && !code){ gateMsg={text:"Staff signup needs an invite code"}; return authScreen(); }
+
+    // Staff sign up as 'athlete' first; the code upgrades them server-side.
+    const signupRole = gateRole==="staff" ? "athlete" : gateRole;
     const { data, error } = await sb.auth.signUp({
-      email, password, options:{ data:{ full_name, role:gateRole } }
+      email, password, options:{ data:{ full_name, role:signupRole } }
     });
     if(error){ gateMsg={text:error.message}; return authScreen(); }
+
     if(!data.session){
-      gateMsg={ok:true, text:"Check your email to confirm your account, then sign in."};
+      gateMsg={ok:true, text: code
+        ? "Check your email to confirm, then sign in and enter your staff code."
+        : "Check your email to confirm your account, then sign in."};
       gateMode = "signin"; return authScreen();
     }
+    if(code){
+      const { error:codeErr } = await sb.rpc("claim_staff_role",{ p_code: code });
+      if(codeErr){ toast(codeErr.message.slice(0,90), true); }
+      else toast("Staff access granted");
+    }
     gateMsg = null; boot();
+  },
+
+  "staff-code"(){
+    openModal({ title:"Enter a staff code",
+      body:`<p class="hint" style="margin-bottom:14px">If OMA gave you an invite code, enter it to switch this account to staff access.</p>
+        <div class="f"><label for="sc">Invite code</label><input id="sc" placeholder="OMA-STAFF-…"></div>`,
+      foot:`<button class="btn" data-close>Cancel</button>
+            <button class="btn btn-primary" data-act="redeem-code">Redeem</button>` });
+  },
+  async "redeem-code"(){
+    const code = $("#sc").value.trim();
+    if(!code){ toast("Enter the code", true); return; }
+    const { error } = await sb.rpc("claim_staff_role",{ p_code: code });
+    if(error){ toast(error.message.slice(0,90), true); return; }
+    closeModal(); toast("Staff access granted"); boot();
   },
 
   async "create-athlete"(){
