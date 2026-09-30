@@ -665,8 +665,8 @@ input,select,textarea{font:inherit;color:inherit}
    ============================================================ */
 
 const CONFIG = {
-  url:     "https://kfxecxvbssunmqcjfgge.supabase.co",      // e.g. https://abcdefgh.supabase.co
-  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmeGVjeHZic3N1bm1xY2pmZ2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MzgwOTIsImV4cCI6MjEwNDUxNDA5Mn0.lC2Mt7yKOhQ2uXF1tjrj8iXKqXmD7yuBFWEWPC805ew"
+  url:     "YOUR_SUPABASE_URL",      // e.g. https://abcdefgh.supabase.co
+  anonKey: "YOUR_SUPABASE_ANON_KEY"
 };
 
 /* ============================================================ */
@@ -794,7 +794,7 @@ async function q(promise, label){
    AUTH / GATE SCREENS
    ============================================================ */
 
-let gateMode = "signin", gateRole = "athlete", gateMsg = null;
+let gateMode = "signin", gateRole = "athlete", gateMsg = null, staffCodeMsg = null;
 
 function showGate(html){
   $("#gate").innerHTML = `<div class="gate">${html}</div>`;
@@ -837,7 +837,7 @@ function authScreen(){
           <b>I work at OMA</b><span>Staff access — needs an invite code</span></button>
       </div>
       ${gateRole==="staff"?`<div class="f"><label for="g-code">Staff invite code</label>
-        <input id="g-code" placeholder="OMA-STAFF-…" autocomplete="off"></div>`:""}
+        <input id="g-code" placeholder="OMA2026" autocomplete="off" autocapitalize="characters"></div>`:""}
       <div class="f"><label for="g-name">Full name</label><input id="g-name" autocomplete="name"></div>`:""}
     <div class="f"><label for="g-email">Email</label><input id="g-email" type="email" autocomplete="email"></div>
     <div class="f"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="${gateMode==="signin"?"current-password":"new-password"}"></div>
@@ -859,6 +859,21 @@ function onboardScreen(){
     <div class="f"><label for="o-sport">Sport</label><input id="o-sport" placeholder="Basketball"></div>
     <div class="f"><label for="o-school">School</label><input id="o-school" placeholder="Marist Preparatory"></div>
     <button class="btn btn-primary" data-act="create-athlete">Create my profile</button>
+  </div>`);
+}
+
+function staffGate(){
+  const err = staffCodeMsg ? `<div class="gate-err">${esc(staffCodeMsg)}</div>` : "";
+  showGate(`<div class="gate-card">
+    <div class="gate-mark"><span class="mark-badge">OM</span><span class="mark-text">Athletes<span> Portal</span></span></div>
+    <h1>Staff access</h1>
+    <p class="lead">Enter the invite code OMA gave you to unlock the staff portal.</p>
+    ${err}
+    <div class="f"><label for="sg-code">Invite code</label>
+      <input id="sg-code" placeholder="OMA2026" autocomplete="off" autocapitalize="characters"></div>
+    <button class="btn btn-primary" data-act="gate-claim-code">Unlock staff portal</button>
+    <p class="gate-switch">Not staff? <button data-act="gate-not-staff">Continue as an athlete</button></p>
+    <p class="gate-switch"><button data-act="signout">Sign out</button></p>
   </div>`);
 }
 
@@ -968,7 +983,12 @@ async function boot(){
 
   if(profile.role==="athlete"){
     const rows = await q(sb.from("athlete_public").select("*").eq("profile_id",profile.id),"my athlete");
-    if(!rows || !rows.length){ onboardScreen(); return; }
+    if(!rows || !rows.length){
+      // Someone who signed up as staff but hasn't redeemed a code yet belongs
+      // on the code screen, not in athlete onboarding.
+      if(session.user.user_metadata?.intended_role === "staff"){ staffGate(); return; }
+      onboardScreen(); return;
+    }
     state.athlete = rows[0]; state.athleteId = rows[0].id;
     state.route = "dashboard";
   }
@@ -1558,9 +1578,12 @@ const ACT = {
     if(gateRole==="staff" && !code){ gateMsg={text:"Staff signup needs an invite code"}; return authScreen(); }
 
     // Staff sign up as 'athlete' first; the code upgrades them server-side.
+    // intended_role is remembered so a wrong code doesn't strand them in
+    // athlete onboarding — they land back on the code screen instead.
     const signupRole = gateRole==="staff" ? "athlete" : gateRole;
     const { data, error } = await sb.auth.signUp({
-      email, password, options:{ data:{ full_name, role:signupRole } }
+      email, password,
+      options:{ data:{ full_name, role:signupRole, intended_role:gateRole } }
     });
     if(error){ gateMsg={text:error.message}; return authScreen(); }
 
@@ -1572,16 +1595,30 @@ const ACT = {
     }
     if(code){
       const { error:codeErr } = await sb.rpc("claim_staff_role",{ p_code: code });
-      if(codeErr){ toast(codeErr.message.slice(0,90), true); }
+      if(codeErr){ staffCodeMsg = codeErr.message; }
       else toast("Staff access granted");
     }
     gateMsg = null; boot();
   },
 
+  async "gate-claim-code"(){
+    const code = $("#sg-code").value.trim();
+    if(!code){ staffCodeMsg = "Enter the code"; return staffGate(); }
+    const { error } = await sb.rpc("claim_staff_role",{ p_code: code });
+    if(error){ staffCodeMsg = error.message; return staffGate(); }
+    staffCodeMsg = null; toast("Staff access granted"); boot();
+  },
+
+  async "gate-not-staff"(){
+    staffCodeMsg = null;
+    await sb.auth.updateUser({ data:{ intended_role:"athlete" } });
+    boot();
+  },
+
   "staff-code"(){
     openModal({ title:"Enter a staff code",
       body:`<p class="hint" style="margin-bottom:14px">If OMA gave you an invite code, enter it to switch this account to staff access.</p>
-        <div class="f"><label for="sc">Invite code</label><input id="sc" placeholder="OMA-STAFF-…"></div>`,
+        <div class="f"><label for="sc">Invite code</label><input id="sc" placeholder="OMA2026" autocapitalize="characters"></div>`,
       foot:`<button class="btn" data-close>Cancel</button>
             <button class="btn btn-primary" data-act="redeem-code">Redeem</button>` });
   },
