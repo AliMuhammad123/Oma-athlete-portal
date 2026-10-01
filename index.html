@@ -563,6 +563,7 @@ input,select,textarea{font:inherit;color:inherit}
     radial-gradient(120% 90% at 80% 0%,rgba(193,151,47,.22),transparent 62%),
     linear-gradient(165deg,#141414,#000 70%);
 }
+body.gated{padding-bottom:0}
 .gate-card{
   width:100%;max-width:430px;background:var(--paper);
   border-radius:20px;padding:28px 24px;
@@ -578,6 +579,21 @@ input,select,textarea{font:inherit;color:inherit}
   text-align:center;margin-top:16px;font-size:13.5px;color:var(--muted);
 }
 .gate-switch button{color:var(--onyx);font-weight:600;text-decoration:underline}
+.gate-note{
+  margin-top:14px;font-size:12.5px;line-height:1.45;color:var(--muted);text-align:center;
+}
+.gate-tabs{
+  display:grid;grid-template-columns:1fr 1fr;gap:4px;
+  background:#EFEDE6;border-radius:12px;padding:4px;margin-bottom:20px;
+}
+.gate-tabs button{
+  padding:9px 8px;border-radius:9px;font-size:14px;font-weight:600;
+  color:var(--muted);
+}
+.gate-tabs button[aria-selected="true"]{
+  background:var(--card);color:var(--ink);
+  box-shadow:0 1px 3px rgba(0,0,0,.10);
+}
 .gate-err{
   background:#F8EDED;color:var(--rust);border-radius:10px;padding:10px 13px;
   font-size:13.5px;margin-bottom:14px;
@@ -799,10 +815,13 @@ let gateMode = "signin", gateRole = "athlete", gateMsg = null, staffCodeMsg = nu
 function showGate(html){
   $("#gate").innerHTML = `<div class="gate">${html}</div>`;
   $("#layout").hidden = true; $("#sidebar").hidden = true; $("#tabbar").hidden = true;
+  // the tab bar is hidden here, so drop the space reserved for it
+  document.body.classList.add("gated");
 }
 function hideGate(){
   $("#gate").innerHTML = "";
   $("#layout").hidden = false; $("#sidebar").hidden = false; $("#tabbar").hidden = false;
+  document.body.classList.remove("gated");
 }
 
 function setupScreen(){
@@ -821,12 +840,21 @@ function setupScreen(){
 
 function authScreen(){
   const err = gateMsg ? `<div class="gate-${gateMsg.ok?"ok":"err"}">${esc(gateMsg.text)}</div>` : "";
+  const isNew = gateMode === "signup";
   showGate(`<div class="gate-card">
     <div class="gate-mark"><span class="mark-badge">OM</span><span class="mark-text">Athletes<span> Portal</span></span></div>
-    <h1>${gateMode==="signin"?"Sign in":"Create your account"}</h1>
-    <p class="lead">${gateMode==="signin"?"Welcome back.":"Athletes and guardians can sign up here. Staff accounts are created by OMA."}</p>
+
+    <div class="gate-tabs" role="tablist">
+      <button role="tab" data-act="gate-switch" data-id="signin" aria-selected="${!isNew}">Sign in</button>
+      <button role="tab" data-act="gate-switch" data-id="signup" aria-selected="${isNew}">Create account</button>
+    </div>
+
+    <h1>${isNew?"Create your account":"Welcome back"}</h1>
+    <p class="lead">${isNew
+      ? "First, tell us who you are. Athletes, parents and OMA staff each get their own account."
+      : "Sign in to your athlete, parent or staff account."}</p>
     ${err}
-    ${gateMode==="signup"?`
+    ${isNew?`
       <div class="roleopts">
         <button class="roleopt" data-act="gate-role" data-id="athlete" aria-pressed="${gateRole==="athlete"}">
           <b>I'm the athlete</b><span>Build my profile</span></button>
@@ -840,12 +868,10 @@ function authScreen(){
         <input id="g-code" placeholder="OMA2026" autocomplete="off" autocapitalize="characters"></div>`:""}
       <div class="f"><label for="g-name">Full name</label><input id="g-name" autocomplete="name"></div>`:""}
     <div class="f"><label for="g-email">Email</label><input id="g-email" type="email" autocomplete="email"></div>
-    <div class="f"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="${gateMode==="signin"?"current-password":"new-password"}"></div>
-    <button class="btn btn-primary" data-act="${gateMode==="signin"?"do-signin":"do-signup"}">
-      ${gateMode==="signin"?"Sign in":"Create account"}</button>
-    <p class="gate-switch">${gateMode==="signin"
-      ? `No account yet? <button data-act="gate-switch" data-id="signup">Sign up</button>`
-      : `Already have one? <button data-act="gate-switch" data-id="signin">Sign in</button>`}</p>
+    <div class="f"><label for="g-pass">Password</label><input id="g-pass" type="password" autocomplete="${isNew?"new-password":"current-password"}"></div>
+    <button class="btn btn-primary" data-act="${isNew?"do-signup":"do-signin"}">
+      ${isNew?"Create account":"Sign in"}</button>
+    ${isNew?`<p class="gate-note">Each person needs their own email. A parent and an athlete cannot share one account.</p>`:""}
   </div>`);
 }
 
@@ -859,6 +885,11 @@ function onboardScreen(){
     <div class="f"><label for="o-sport">Sport</label><input id="o-sport" placeholder="Basketball"></div>
     <div class="f"><label for="o-school">School</label><input id="o-school" placeholder="Marist Preparatory"></div>
     <button class="btn btn-primary" data-act="create-athlete">Create my profile</button>
+    <p class="gate-note">Signed up as the wrong type? A parent or staff account needs its own email address.</p>
+    <p class="gate-switch">
+      <button data-act="staff-code">I have a staff code</button> &nbsp;·&nbsp;
+      <button data-act="signout">Sign out</button>
+    </p>
   </div>`);
 }
 
